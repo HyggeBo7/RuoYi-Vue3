@@ -15,9 +15,10 @@ export let isRelogin = {show: false};
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
 const transformRequest = (data = {}, headers) => {
-  console.log("transformRequest===headers:",headers);
-  if (typeof data === 'string') return data;
-  if(headers['Content-Type'].includes('application/x-www-form-urlencoded')){
+  if (typeof data === 'string') {
+    return data;
+  }
+  if (headers['Content-Type'].includes('application/x-www-form-urlencoded')) {
     return qs.stringify(data)
   }
   return data;
