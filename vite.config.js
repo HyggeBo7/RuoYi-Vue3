@@ -34,6 +34,12 @@ export default defineConfig(({ mode, command }) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, '')
+        },
+        '/bo-api-xfylw':{
+          target: 'https://xfyl.wubo777.top',
+          changeOrigin: true,
+          rewrite: (p) => p
+          //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, '')
         }
       }
     },
