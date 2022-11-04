@@ -1,34 +1,83 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" v-show="showSearch" :inline="true">
-      <el-form-item label="昵称" prop="name">
-        <el-input
-            v-model="queryParams.name"
-            placeholder="请输入角色名称"
-            clearable
-            style="width: 240px"
-            @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="城市" prop="city">
-        <el-input
-            v-model="queryParams.city"
-            placeholder="请输入权限字符"
-            clearable
-            style="width: 240px"
-            @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <!--<el-form-item label="创建时间" style="width: 308px">
-        <el-date-picker
-            v-model="dateRange"
-            value-format="YYYY-MM-DD"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-        ></el-date-picker>
-      </el-form-item>-->
+      <el-collapse accordion>
+        <el-collapse-item name="1">
+          <template #title>
+            <div style="padding-top: 20px;">
+              <el-form-item label="年龄" prop="endAge">
+                <el-input v-model="queryParams.endAge" placeholder="请输入年龄(小于)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+              </el-form-item>
+              <el-form-item label="昵称" prop="name">
+                <el-input v-model="queryParams.name" placeholder="请输入昵称" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+              </el-form-item>
+              <el-form-item label="城市" prop="city">
+                <el-select v-model="queryParams.city" placeholder="请选择城市" clearable style="width: 240px" @change="handleQuery">
+                  <el-option v-for="dict in [{'value':'重庆','label':'重庆'},{'value':'成都','label':'成都'},{'value':'深圳','label':'深圳'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="星座" prop="constellation">
+                <el-select v-model="queryParams.constellation" placeholder="请选择星座" clearable style="width: 240px" @change="handleQuery">
+                  <el-option
+                      v-for="dict in [{'value':'白羊座','label':'白羊座(0321-0419)'},{'value':'金牛座','label':'金牛座(0420-0520)'},{'value':'双子座','label':'双子座(0521-0621)'},{'value':'巨蟹座','label':'巨蟹座(0622-0722)'},{'value':'狮子座','label':'狮子座(0723-0822)'},{'value':'处女座','label':'处女座(0823-0922)'},{'value':'天枰座','label':'天枰座(0923-1023)'},{'value':'天蝎座','label':'天蝎座(1024-1122)'},{'value':'射手座','label':'射手座(1123-1221)'},{'value':'摩羯座','label':'摩羯座(1222-0119)'},{'value':'水瓶座','label':'水瓶座(0120-0218)'},{'value':'双鱼座','label':'双鱼座(0219-0320)'}]"
+                      :key="dict.value" :label="dict.label" :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="性别" prop="gender">
+                <el-select v-model="queryParams.gender" placeholder="请选择性别" clearable style="width: 240px" @change="handleQuery">
+                  <el-option v-for="dict in [{'value':2,'label':'女'},{'value':1,'label':'男'},{'value':0,'label':'未知'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+            </div>
+          </template>
+          <el-form-item label="编码" prop="userId">
+            <el-input v-model="queryParams.userId" placeholder="请输入编码(数字)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="微信" prop="wechat">
+            <el-input v-model="queryParams.wechat" placeholder="请输入微信(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="电话" prop="phone">
+            <el-input v-model="queryParams.phone" placeholder="请输入电话(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="queryParams.email" placeholder="请输入邮箱(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="更新时间" style="width: 318px">
+            <el-date-picker
+                v-model="dateRange.updateTime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                type="datetimerange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item label="生日" style="width: 308px">
+            <el-date-picker
+                v-model="dateRange.birthday"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item label="年龄" prop="startAge">
+            <el-input v-model="queryParams.startAge" placeholder="请输入年龄(大于)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="年龄" prop="age">
+            <el-input v-model="queryParams.age" placeholder="请输入年龄(等于)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="过滤照片" prop="photoValueFlag">
+            <el-select v-model="queryParams.photoValueFlag" placeholder="是否过滤照片" clearable style="width: 240px" @change="handleQuery">
+              <el-option v-for="dict in [{'value':true,'label':'过滤空照片'},{'value':false,'label':'不过滤空照片'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="排序" prop="orderBy">
+            <el-input v-model="queryParams.orderBy" placeholder="自定义排序" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+        </el-collapse-item>
+      </el-collapse>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -40,9 +89,43 @@
 
     <!-- 表格数据 -->
     <el-table v-loading="loading" :data="lazyCircleUserList">
-      <el-table-column label="昵称" prop="name" width="120"/>
-      <el-table-column label="年龄" prop="age" :show-overflow-tooltip="true" width="150"/>
-      <el-table-column label="婚姻状态" prop="marriage" :show-overflow-tooltip="true" width="150"/>
+      <el-table-column type="expand">
+        <template #default="props">
+          <div style="padding: 10px 20px;">{{ props.row }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="序号" type="index" width="50"/>
+      <el-table-column label="头像" align="center" idth="30">
+        <template #default="scope">
+          <div @click="handlePhoto(scope.row)" style="cursor: pointer">
+            <el-avatar :src="scope.row.avatar"/>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="编码" prop="userId"/>
+      <el-table-column label="昵称" prop="name" width="120" :show-overflow-tooltip="true"/>
+      <el-table-column label="性别" prop="gender">
+        <template #default="scope">
+          <span>{{ scope.row.gender === 2 ? '女' : scope.row.gender === 1 ? '男' : '未知-' + scope.row.gender }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="年龄" prop="age"/>
+      <el-table-column label="职业" prop="profession" width="100" :show-overflow-tooltip="true"/>
+      <el-table-column label="婚姻状态" prop="marriage"/>
+      <el-table-column label="身高" prop="height">
+        <template #default="scope">
+          <span>{{ scope.row.height }}cm</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="体重" prop="weight"/>
+      <el-table-column label="星座" prop="constellation"/>
+      <el-table-column label="学历" prop="education"/>
+      <el-table-column label="收入范围" prop="income" width="100" :show-overflow-tooltip="true"/>
+      <el-table-column label="车/房" prop="house" width="80" :show-overflow-tooltip="true">
+        <template #default="scope">
+          <span>{{ scope.row.car }}/{{ scope.row.house }}</span>
+        </template>
+      </el-table-column>
       <!--<el-table-column label="显示顺序" prop="roleSort" width="100"/>
       <el-table-column label="状态" align="center" width="100">
         <template #default="scope">
@@ -54,14 +137,21 @@
           ></el-switch>
         </template>
       </el-table-column>-->
-      <el-table-column label="更新时间" align="center" prop="updateTime">
+      <el-table-column label="更新日期" align="center" prop="updateTime">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.updateTime) }}</span>
+          <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最后更新时间" align="center" prop="sysUpdateTime">
+      <el-table-column label="同步日期" align="center" prop="sysUpdateTime" :show-overflow-tooltip="true" width="100">
         <template #default="scope">
           <span>{{ parseTime(scope.row.sysUpdateTime) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" width="80" class-name="small-padding fixed-width">
+        <template #default="scope">
+          <el-button type="text" icon="Edit" title="更新" @click="handleUpdate(scope.row)"></el-button>
+          <el-button type="text" icon="View" title="详情" @click="handleDetail(scope.row)"></el-button>
+          <!--<el-button type="text" icon="Picture" title="照片" @click="handlePhoto(scope.row)"></el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -73,37 +163,155 @@
         v-model:limit="queryParams.pageSize"
         @pagination="getList"
     />
+
+    <el-dialog title="照片信息" v-model="dialog.photo" append-to-body>
+      <div class="demo-image__lazy">
+        <div v-for="item in photoList">
+          <div style="margin: 10px auto;text-align: center;font-weight: bold;">
+            {{ item.user_id }}---{{ item.create_date }}
+          </div>
+          <el-image :key="item.url" :src="item.url" lazy/>
+        </div>
+
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="dialog.photo=false">确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog title="详细信息" v-model="dialog.userDetail" append-to-body>
+      <div>
+        <div style="padding: 10px 20px;">
+          <!--:size="size"-->
+          <el-descriptions class="margin-top" title="个人信息" :column="3" border>
+            <el-descriptions-item label="名称"> {{ lazyCircleUserData.name }}</el-descriptions-item>
+            <el-descriptions-item label="生日"> {{ parseTime(lazyCircleUserData.birthday, '{y}-{m}-{d}') }}</el-descriptions-item>
+            <el-descriptions-item label="年龄">{{ lazyCircleUserData.age }}</el-descriptions-item>
+            <el-descriptions-item label="身高">{{ lazyCircleUserData.height }}</el-descriptions-item>
+            <el-descriptions-item label="体重">{{ lazyCircleUserData.weight }}</el-descriptions-item>
+            <el-descriptions-item label="星座">{{ lazyCircleUserData.constellation }}</el-descriptions-item>
+            <el-descriptions-item label="职业">{{ lazyCircleUserData.profession }}</el-descriptions-item>
+            <el-descriptions-item label="学历">{{ lazyCircleUserData.education }}</el-descriptions-item>
+            <el-descriptions-item label="婚姻状态">{{ lazyCircleUserData.marriage }}</el-descriptions-item>
+            <el-descriptions-item label="车">{{ lazyCircleUserData.car }}</el-descriptions-item>
+            <el-descriptions-item label="房">{{ lazyCircleUserData.house }}</el-descriptions-item>
+            <el-descriptions-item label="收入范围">{{ lazyCircleUserData.income }}</el-descriptions-item>
+            <el-descriptions-item label="城市">{{ lazyCircleUserData.city }}</el-descriptions-item>
+            <el-descriptions-item label="籍贯">{{ lazyCircleUserData.hometown }}</el-descriptions-item>
+            <el-descriptions-item label="居住地">{{ lazyCircleUserData.address }}</el-descriptions-item>
+            <el-descriptions-item label="微信">{{ lazyCircleUserData.wechat }}</el-descriptions-item>
+            <el-descriptions-item label="电话">{{ lazyCircleUserData.phone }}</el-descriptions-item>
+            <el-descriptions-item label="邮箱">{{ lazyCircleUserData.email }}</el-descriptions-item>
+            <el-descriptions-item label="民族">{{ lazyCircleUserData.nation }}</el-descriptions-item>
+            <el-descriptions-item label="何时结婚">{{ lazyCircleUserData.timeMarriage }}</el-descriptions-item>
+            <el-descriptions-item label="是否要孩子">{{ lazyCircleUserData.wannaChildren }}</el-descriptions-item>
+            <el-descriptions-item label="家庭情况">{{ lazyCircleUserData.family }}</el-descriptions-item>
+            <el-descriptions-item label="形状">{{ lazyCircleUserData.shape }}</el-descriptions-item>
+            <el-descriptions-item label="是否吸烟">{{ lazyCircleUserData.smoking }}</el-descriptions-item>
+            <el-descriptions-item label="是否喝酒">{{ lazyCircleUserData.drinking }}</el-descriptions-item>
+            <el-descriptions-item :span="2" label="其他成员">{{ lazyCircleUserData.brotherSister }}</el-descriptions-item>
+            <el-descriptions-item :span="3" label="兴趣爱好">{{ lazyCircleUserData.hobby }}</el-descriptions-item>
+            <el-descriptions-item :span="3" label="自我介绍">{{ lazyCircleUserData.describe }}</el-descriptions-item>
+          </el-descriptions>
+          <el-descriptions class="margin-top" title="择偶标准" :column="4" border>
+            <el-descriptions-item label="年龄">{{ lazyCircleUserData.rAge }}</el-descriptions-item>
+            <el-descriptions-item label="身高">{{ lazyCircleUserData.rHeight }}</el-descriptions-item>
+            <el-descriptions-item label="学历">{{ lazyCircleUserData.rEducation }}</el-descriptions-item>
+            <el-descriptions-item label="职业">{{ lazyCircleUserData.rProfession }}</el-descriptions-item>
+            <el-descriptions-item label="收入范围">{{ lazyCircleUserData.rIncome }}</el-descriptions-item>
+            <el-descriptions-item label="车/房">{{ lazyCircleUserData.rCar }}/{{ lazyCircleUserData.rHouse }}</el-descriptions-item>
+            <el-descriptions-item label="工作地区">{{ lazyCircleUserData.rAddress }}</el-descriptions-item>
+            <el-descriptions-item label="婚姻情况">{{ lazyCircleUserData.rMarriage }}</el-descriptions-item>
+            <el-descriptions-item label="形状">{{ lazyCircleUserData.rShape }}</el-descriptions-item>
+            <el-descriptions-item label="是否想要孩子">{{ lazyCircleUserData.rWannaChildren }}</el-descriptions-item>
+            <el-descriptions-item label="是否吸烟">{{ lazyCircleUserData.rSmoking }}</el-descriptions-item>
+            <el-descriptions-item label="是否喝酒">{{ lazyCircleUserData.rDrinking }}</el-descriptions-item>
+            <el-descriptions-item :span="4" label="其他要求">{{ lazyCircleUserData.rOthers }}</el-descriptions-item>
+          </el-descriptions>
+          <el-descriptions class="margin-top" title="其他" :column="3" border>
+            <el-descriptions-item label="同步日期">{{ lazyCircleUserData.sysUpdateTime }}</el-descriptions-item>
+            <el-descriptions-item label="修改时间">{{ lazyCircleUserData.updateTime }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">{{ lazyCircleUserData.createTime }}</el-descriptions-item>
+            <el-descriptions-item>
+              <template #label>
+                <div class="cell-item">喜欢人数</div>
+              </template>
+              {{ lazyCircleUserData.likes }}
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template #label>
+                <div class="cell-item">预览数</div>
+              </template>
+              {{ lazyCircleUserData.views }}
+            </el-descriptions-item>
+            <el-descriptions-item label="unlockScore">{{ lazyCircleUserData.unlockScore }}</el-descriptions-item>
+            <el-descriptions-item label="recNum">{{ lazyCircleUserData.recNum }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="success" @click="handlePhoto(lazyCircleUserData)">查看照片</el-button>
+          <el-button @click="dialog.userDetail=false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Lhq">
-import {getListLazyCircleUser} from '@/api/lhq';
+import {getListLazyCircleUser, updateLhqUser} from '@/api/lhq';
 
 const lazyCircleUserList = ref([]);
+const lazyCircleUserData = ref({});
 const {proxy} = getCurrentInstance();
 const loading = ref(true);
+const dialog = ref({photo: false, userDetail: false});
+const photoList = ref([]);
 const showSearch = ref(true);
 const total = ref(0);
-const dateRange = ref([]);
+const dateRange = ref({updateTime: [], birthday: []});
 const data = reactive({
   form: {},
   queryParams: {
     pageIndex: 1,
     pageSize: 10,
-    name: '',
-    city: '重庆',
+    photoValueFlag: true,
+    constellation: null,
+    wechat: null,
+    phone: null,
+    email: null,
+    city: "重庆",
     gender: 2,
-    endAge: 27
+    userId: null,
+    orderBy: null,
+    name: null,
+    age: null,
+    startAge: null,
+    endAge: 27,
+    startUpdateTime: null,
+    endUpdateTime: null,
+    startBirthday: null,
+    endBirthday: null
   }
 });
 
 const {queryParams, form, rules} = toRefs(data);
 
 function getList() {
-  console.log("加载懒汉圈界面.......");
+  console.log("加载懒汉圈界面.......", dateRange.value.updateTime);
   loading.value = true;
-  getListLazyCircleUser(proxy.addDateRange(queryParams.value)).then(response => {
-    console.log("getListLazyCircleUser---response", response);
+  const dateRangeValue = dateRange.value;
+  getListLazyCircleUser({
+    ...queryParams.value,
+    startUpdateTime: dateRangeValue.updateTime[0],
+    endUpdateTime: dateRangeValue.updateTime[1],
+    startBirthday: dateRangeValue.birthday[0],
+    endBirthday: dateRangeValue.birthday[1]
+  }).then(response => {
+    //console.log("getListLazyCircleUser---response", response);
     lazyCircleUserList.value = response.data.data;
     total.value = response.data.totalPage;
     loading.value = false;
@@ -112,16 +320,59 @@ function getList() {
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  queryParams.value.pageNum = 1;
+  queryParams.value.pageIndex = 1;
   getList();
+}
+
+function handleUpdate(row) {
+  proxy.$modal.confirm('确认要更新编码[' + row.userId + ']信息么?').then(function () {
+    return updateLhqUser({toUserId: row.userId});
+  }).then(response => {
+    //console.log("getListLazyCircleUser---updateLhqUser", response);
+    proxy.$modal.msgSuccess(response.msg);
+    getList();
+  }).catch(function () {
+    row.status = row.status === "0" ? "1" : "0";
+  });
+}
+
+function handleDetail(row) {
+  lazyCircleUserData.value = row;
+  dialog.value.userDetail = true;
+}
+
+function handlePhoto(row) {
+  if (row.photos && row.photos !== '[]') {
+    photoList.value = JSON.parse(row.photos);
+    dialog.value.photo = true;
+  } else {
+    proxy.$modal.msgWarning("暂无相关照片");
+  }
 }
 
 /** 重置按钮操作 */
 function resetQuery() {
-  dateRange.value = [];
+  dateRange.value.updateTime = [];
+  dateRange.value.birthday = [];
   proxy.resetForm("queryRef");
   handleQuery();
 }
 
 getList();
 </script>
+<style scoped>
+.demo-image__lazy {
+  height: 600px;
+  overflow-y: auto;
+}
+
+.demo-image__lazy .el-image {
+  display: block;
+  min-height: 280px;
+  margin-bottom: 20px;
+}
+
+.demo-image__lazy .el-image:last-child {
+  margin-bottom: 0;
+}
+</style>

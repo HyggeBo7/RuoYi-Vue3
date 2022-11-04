@@ -8,3 +8,11 @@ export function getListLazyCircleUser(data) {
     data: data
   })
 }
+
+export function updateLhqUser(data) {
+  return request({
+    url: '/lhq/updateLhqUser',
+    method: 'get',
+    params: data
+  })
+}

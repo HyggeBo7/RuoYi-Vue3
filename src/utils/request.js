@@ -14,12 +14,15 @@ export let isRelogin = {show: false};
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
-const transformRequest = (data = {}, headers) => {
-  if (typeof data === 'string') {
-    return data;
-  }
-  if (headers['Content-Type'].includes('application/x-www-form-urlencoded')) {
-    return qs.stringify(data)
+const transformRequest = (data, headers) => {
+  if (data) {
+    if (typeof data === 'string') {
+      return data;
+    }
+    if (headers['Content-Type'].includes('application/x-www-form-urlencoded')) {
+      return qs.stringify(data)
+    }
+    return JSON.stringify(data);
   }
   return data;
 }
@@ -42,7 +45,7 @@ service.interceptors.request.use(config => {
   if (getToken() && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   }
-  if (config.url.includes('listLazyCircleUser')) {
+  if (config.url.includes('/lhq/')) {
     config.baseURL = '/bo-api-xfylw';
   }
   // get请求映射params参数
@@ -52,7 +55,7 @@ service.interceptors.request.use(config => {
     config.params = {};
     config.url = url;
   }
-  console.log("interceptors-config:", config);
+  //console.log("interceptors-config:", config);
   if (!isRepeatSubmit && (config.method === 'post' || config.method === 'put')) {
     const requestObj = {
       url: config.url,
