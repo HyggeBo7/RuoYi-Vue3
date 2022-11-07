@@ -64,6 +64,7 @@ import useSettingsStore from '@/store/modules/settings'
 const appStore = useAppStore()
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
+const router = useRouter();
 
 function toggleSideBar() {
   appStore.toggleSideBar()
@@ -89,7 +90,8 @@ function logout() {
     type: 'warning'
   }).then(() => {
     userStore.logOut().then(() => {
-      location.href = '/index';
+      //location.href = '/index';
+      router.push('/login');
     })
   }).catch(() => { });
 }

@@ -2,6 +2,8 @@ import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
 
+import globalConfig from '../../config'
+
 /**
  * Note: 路由配置项
  *
@@ -161,7 +163,7 @@ export const dynamicRoutes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(globalConfig.publicPath),
   routes: constantRoutes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
