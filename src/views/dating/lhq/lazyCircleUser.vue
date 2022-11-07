@@ -301,7 +301,6 @@ const data = reactive({
 const {queryParams, form, rules} = toRefs(data);
 
 function getList() {
-  console.log("加载懒汉圈界面.......", dateRange.value.updateTime);
   loading.value = true;
   const dateRangeValue = dateRange.value;
   getListLazyCircleUser({
@@ -313,7 +312,7 @@ function getList() {
   }).then(response => {
     //console.log("getListLazyCircleUser---response", response);
     lazyCircleUserList.value = response.data.data;
-    total.value = response.data.totalPage;
+    total.value = response.data.count;
     loading.value = false;
   });
 }
