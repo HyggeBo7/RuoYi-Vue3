@@ -161,9 +161,9 @@ export const dynamicRoutes = [
     ]
   }
 ]
-
+//globalConfig.publicPath +
 const router = createRouter({
-  history: createWebHistory(globalConfig.publicPath + "#/"),
+  history: createWebHistory("#/"),
   routes: constantRoutes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {

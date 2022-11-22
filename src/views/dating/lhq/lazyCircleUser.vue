@@ -165,6 +165,17 @@
     />
 
     <el-dialog title="照片信息" v-model="dialog.photo" append-to-body>
+      <div style="text-align: center;">
+        {{lazyCircleUserData.name}}
+        <el-image
+            style="width: 66px; height: 56px;"
+            :src="lazyCircleUserData.avatar"
+            alt="预览照片"
+            title="预览照片"
+            :preview-src-list="photoList.map(d=>d.url)"
+            fit="cover"
+        />
+      </div>
       <div class="demo-image__lazy">
         <div v-for="item in photoList">
           <div style="margin: 10px auto;text-align: center;font-weight: bold;">
@@ -176,7 +187,8 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="dialog.photo=false">确 定</el-button>
+          <el-button v-if="!dialog.userDetail" type="primary" @click="handleDetail(lazyCircleUserData)">查看详情</el-button>
+          <el-button @click="dialog.photo=false">关闭</el-button>
         </div>
       </template>
     </el-dialog>
@@ -253,7 +265,7 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="success" @click="handlePhoto(lazyCircleUserData)">查看照片</el-button>
+          <el-button v-if="!dialog.photo" type="success" @click="handlePhoto(lazyCircleUserData)">查看照片</el-button>
           <el-button @click="dialog.userDetail=false">关闭</el-button>
         </div>
       </template>
@@ -343,6 +355,9 @@ function handleDetail(row) {
 function handlePhoto(row) {
   if (row.photos && row.photos !== '[]') {
     photoList.value = JSON.parse(row.photos);
+    if (!dialog.value.userDetail) {
+      lazyCircleUserData.value = row;
+    }
     dialog.value.photo = true;
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
