@@ -165,16 +165,17 @@
     />
 
     <el-dialog title="照片信息" v-model="dialog.photo" append-to-body>
-      <div style="text-align: center;">
-        {{lazyCircleUserData.name}}
+      <div style="text-align: center;font-weight: bold;">
+        <span style="margin: 0 10px;">{{ lazyCircleUserData.name }}</span>
         <el-image
             style="width: 66px; height: 56px;"
             :src="lazyCircleUserData.avatar"
             alt="预览照片"
             title="预览照片"
             :preview-src-list="photoList.map(d=>d.url)"
-            fit="cover"
-        />
+            fit="cover"/>
+        <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
+        <span style="margin: 0 10px;"><label style="color: #F56C6C">{{lazyCircleUserList.indexOf(lazyCircleUserData) + 1}}</label> / {{lazyCircleUserList.length}}</span>
       </div>
       <div class="demo-image__lazy">
         <div v-for="item in photoList">
@@ -187,6 +188,8 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
+          <el-button type="warning" @click="handleLastNext(true)">上一个</el-button>
+          <el-button type="danger" @click="handleLastNext(false)">下一个</el-button>
           <el-button v-if="!dialog.userDetail" type="primary" @click="handleDetail(lazyCircleUserData)">查看详情</el-button>
           <el-button @click="dialog.photo=false">关闭</el-button>
         </div>
@@ -260,11 +263,15 @@
             </el-descriptions-item>
             <el-descriptions-item label="unlockScore">{{ lazyCircleUserData.unlockScore }}</el-descriptions-item>
             <el-descriptions-item label="recNum">{{ lazyCircleUserData.recNum }}</el-descriptions-item>
+            <el-descriptions-item label="编码">{{ lazyCircleUserData.userId }}</el-descriptions-item>
+            <el-descriptions-item label="状态">{{ lazyCircleUserData.status }}</el-descriptions-item>
           </el-descriptions>
         </div>
       </div>
       <template #footer>
         <div class="dialog-footer">
+          <el-button type="warning" @click="handleLastNext(true)">上一个</el-button>
+          <el-button type="danger" @click="handleLastNext(false)">下一个</el-button>
           <el-button v-if="!dialog.photo" type="success" @click="handlePhoto(lazyCircleUserData)">查看照片</el-button>
           <el-button @click="dialog.userDetail=false">关闭</el-button>
         </div>
@@ -289,7 +296,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageIndex: 1,
-    pageSize: 10,
+    pageSize: 50,
     photoValueFlag: true,
     constellation: null,
     wechat: null,
@@ -361,6 +368,26 @@ function handlePhoto(row) {
     dialog.value.photo = true;
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
+  }
+}
+
+//上/下一个用户信息
+function handleLastNext(lastFlag = false) {
+  let totalSize = lazyCircleUserList.value.length - 1;
+  let dataIndex = lazyCircleUserList.value.indexOf(lazyCircleUserData.value);
+  let lastNextFlag = lastFlag ? totalSize > 0 && dataIndex > 0 : dataIndex < totalSize;
+  if (lastNextFlag) {
+    let currentLazyCircleUserData = lazyCircleUserList.value[lastFlag ? --dataIndex : ++dataIndex];
+    if (dialog.value.photo) {
+      if (currentLazyCircleUserData.photos && currentLazyCircleUserData.photos !== '[]') {
+        photoList.value = JSON.parse(currentLazyCircleUserData.photos);
+      } else {
+        photoList.value = [];
+      }
+    }
+    lazyCircleUserData.value = currentLazyCircleUserData;
+  } else {
+    proxy.$modal.msgWarning(lastFlag ? "当前没有上一个用户信息" : "当前没有下一个用户信息");
   }
 }
 
