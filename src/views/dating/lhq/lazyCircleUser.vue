@@ -79,8 +79,11 @@
         </el-collapse-item>
       </el-collapse>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <div style="margin-top: 20px">
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+          <el-button type="warning" icon="Edit" @click="handleUpdateSpecifyUser">更新指定信息</el-button>
+        </div>
       </el-form-item>
     </el-form>
     <el-row :gutter="10" class="mb8">
@@ -149,9 +152,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="80" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button type="text" icon="Edit" title="更新" @click="handleUpdate(scope.row)"></el-button>
-          <el-button type="text" icon="View" title="详情" @click="handleDetail(scope.row)"></el-button>
-          <!--<el-button type="text" icon="Picture" title="照片" @click="handlePhoto(scope.row)"></el-button>-->
+          <el-button type="warning" link icon="Edit" title="更新" @click="handleUpdate(scope.row)"></el-button>
+          <el-button type="success" link icon="View" title="详情" @click="handleDetail(scope.row)"></el-button>
+          <!--<el-button link icon="Picture" title="照片" @click="handlePhoto(scope.row)"></el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -164,6 +167,35 @@
         @pagination="getList"
     />
 
+    <el-dialog title="更新用户信息" v-model="dialog.updateToUser" append-to-body>
+      <div style="margin-bottom: 10px">
+        <el-input v-model="specifyUserData.toUserId" placeholder="请输入更新用户编码">
+          <template #prepend><label style="color: red">*</label> toUserId</template>
+        </el-input>
+      </div>
+      <div style="margin: 10px 0">
+        <el-input v-model="specifyUserData.userId" placeholder="请输入指定更新人编码(可不传)">
+          <template #prepend> userId </template>
+        </el-input>
+      </div>
+      <div  style="margin: 10px 0">
+        更新人和查询人是否指定同一个：
+        <el-radio-group v-model="specifyUserData.sameUserFlag">
+          <el-radio :label="true">是</el-radio>
+          <el-radio :label="false">否</el-radio>
+        </el-radio-group>
+      </div>
+      <div>
+        {{ specifyUserData.userData }}
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitUpdateSpecifyUser">提交</el-button>
+          <el-button @click="dialog.updateToUser=false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog title="照片信息" v-model="dialog.photo" append-to-body>
       <div style="text-align: center;font-weight: bold;">
         <span style="margin: 0 10px;">{{ lazyCircleUserData.name }}</span>
@@ -175,7 +207,7 @@
             :preview-src-list="photoList.map(d=>d.url)"
             fit="cover"/>
         <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
-        <span style="margin: 0 10px;"><label style="color: #F56C6C">{{lazyCircleUserList.indexOf(lazyCircleUserData) + 1}}</label> / {{lazyCircleUserList.length}}</span>
+        <span style="margin: 0 10px;"><label style="color: #F56C6C">{{ lazyCircleUserList.indexOf(lazyCircleUserData) + 1 }}</label> / {{ lazyCircleUserList.length }}</span>
       </div>
       <div class="demo-image__lazy">
         <div v-for="item in photoList">
@@ -184,7 +216,6 @@
           </div>
           <el-image :key="item.url" :src="item.url" lazy/>
         </div>
-
       </div>
       <template #footer>
         <div class="dialog-footer">
@@ -287,7 +318,7 @@ const lazyCircleUserList = ref([]);
 const lazyCircleUserData = ref({});
 const {proxy} = getCurrentInstance();
 const loading = ref(true);
-const dialog = ref({photo: false, userDetail: false});
+const dialog = ref({photo: false, userDetail: false, updateToUser: false});
 const photoList = ref([]);
 const showSearch = ref(true);
 const total = ref(0);
@@ -316,6 +347,7 @@ const data = reactive({
     endBirthday: null
   }
 });
+const specifyUserData = ref({toUserId: null, userId: null, sameUserFlag: true, userData: null});
 
 const {queryParams, form, rules} = toRefs(data);
 
@@ -342,6 +374,30 @@ function handleQuery() {
   getList();
 }
 
+//更新指定用户
+function handleUpdateSpecifyUser() {
+  specifyUserData.value.userId = null;
+  specifyUserData.value.sameUserFlag = true;
+  specifyUserData.value.toUserId = null;
+  dialog.value.updateToUser = true;
+}
+
+//提交更新指定用户信息
+function submitUpdateSpecifyUser() {
+  if(specifyUserData.value.toUserId){
+    proxy.$modal.confirm('确认要更新编码[' + specifyUserData.value.toUserId + ']信息么?').then(function () {
+      return updateLhqUser({toUserId: specifyUserData.value.toUserId, userId: specifyUserData.value.sameUserFlag ? specifyUserData.value.toUserId : specifyUserData.value.userId});
+    }).then(response => {
+      specifyUserData.value.userData = response.data ? JSON.stringify(response.data) : response.data;
+      proxy.$modal.msgSuccess(response.msg);
+      getList();
+    }).catch(function () {
+    });
+  }else{
+    proxy.$modal.msgWarning("toUserId 必须指定");
+  }
+}
+
 function handleUpdate(row) {
   proxy.$modal.confirm('确认要更新编码[' + row.userId + ']信息么?').then(function () {
     return updateLhqUser({toUserId: row.userId});
@@ -350,7 +406,6 @@ function handleUpdate(row) {
     proxy.$modal.msgSuccess(response.msg);
     getList();
   }).catch(function () {
-    row.status = row.status === "0" ? "1" : "0";
   });
 }
 
