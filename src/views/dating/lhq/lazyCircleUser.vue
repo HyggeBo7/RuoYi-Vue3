@@ -36,6 +36,9 @@
           <el-form-item label="微信" prop="wechat">
             <el-input v-model="queryParams.wechat" placeholder="请输入微信(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
           </el-form-item>
+          <el-form-item label="职业" prop="profession">
+            <el-input v-model="queryParams.profession" placeholder="请输入职业(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
           <el-form-item label="电话" prop="phone">
             <el-input v-model="queryParams.phone" placeholder="请输入电话(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
           </el-form-item>
@@ -83,6 +86,7 @@
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           <el-button type="warning" icon="Edit" @click="handleUpdateSpecifyUser">更新指定信息</el-button>
+          <el-button type="primary" @click="handleUserFollowList">关注列表</el-button>
         </div>
       </el-form-item>
     </el-form>
@@ -91,7 +95,7 @@
     </el-row>
 
     <!-- 表格数据 -->
-    <el-table v-loading="loading" :data="lazyCircleUserList">
+    <el-table v-loading="loading.loadTable" :data="lazyCircleUserList">
       <el-table-column type="expand">
         <template #default="props">
           <div style="padding: 10px 20px;">{{ props.row }}</div>
@@ -167,6 +171,36 @@
         @pagination="getList"
     />
 
+    <el-dialog title="我的关注列表" v-model="dialog.userFollow" append-to-body>
+      <div>
+        <el-table v-loading="loading.loadUserFollowTable" :data="userFollowList">
+          <el-table-column label="序号" type="index" width="50"/>
+          <!--<el-table-column label="关注者编号" prop="followId"/>-->
+          <el-table-column label="关注编号" prop="toFollowId"/>
+          <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
+            <template #default="scope">
+              <el-button type="warning" link icon="Edit" title="取消关注" @click="handleInsertUserFollow(scope.row.toFollowId,true)"></el-button>
+              <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserFollowPhoto(scope.row.toFollowId)"></el-button>
+              <el-button type="success" link icon="View" title="详情" @click="handleUserFollow(scope.row.toFollowId)"></el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+            v-show="totalUserFollow > 0"
+            :total="totalUserFollow"
+            v-model:page="queryParamUserFollow.pageIndex"
+            v-model:limit="queryParamUserFollow.pageSize"
+            @pagination="getUserFollowList"
+        />
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialog.userFollow=false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog title="更新用户信息" v-model="dialog.updateToUser" append-to-body>
       <div style="margin-bottom: 10px">
         <el-input v-model="specifyUserData.toUserId" placeholder="请输入更新用户编码">
@@ -175,10 +209,10 @@
       </div>
       <div style="margin: 10px 0">
         <el-input v-model="specifyUserData.userId" placeholder="请输入指定更新人编码(可不传)">
-          <template #prepend> userId </template>
+          <template #prepend> userId</template>
         </el-input>
       </div>
-      <div  style="margin: 10px 0">
+      <div style="margin: 10px 0">
         更新人和查询人是否指定同一个：
         <el-radio-group v-model="specifyUserData.sameUserFlag">
           <el-radio :label="true">是</el-radio>
@@ -296,11 +330,15 @@
             <el-descriptions-item label="recNum">{{ lazyCircleUserData.recNum }}</el-descriptions-item>
             <el-descriptions-item label="编码">{{ lazyCircleUserData.userId }}</el-descriptions-item>
             <el-descriptions-item label="状态">{{ lazyCircleUserData.status }}</el-descriptions-item>
+            <el-descriptions-item label="是否关注">
+              <label v-show="!loading.loadUserFollow">{{ !userFollowData ? "从未关注" : userFollowData.status === 1 ? "已关注" : "未关注" }}</label>
+            </el-descriptions-item>
           </el-descriptions>
         </div>
       </div>
       <template #footer>
         <div class="dialog-footer">
+          <el-button type="primary" :loading="loading.loadUserFollow" @click="handleInsertUserFollow(lazyCircleUserData.userId)">{{ userFollowData && userFollowData.status === 1 ? "取消关注" : "关注" }}</el-button>
           <el-button type="warning" @click="handleLastNext(true)">上一个</el-button>
           <el-button type="danger" @click="handleLastNext(false)">下一个</el-button>
           <el-button v-if="!dialog.photo" type="success" @click="handlePhoto(lazyCircleUserData)">查看照片</el-button>
@@ -312,16 +350,19 @@
 </template>
 
 <script setup name="Lhq">
-import {getListLazyCircleUser, updateLhqUser} from '@/api/lhq';
+import {getListLazyCircleUser, updateLhqUser, getUserFollow, insertUserFollow, getListUserFollow, getLazyCircleUserByUserId} from '@/api/lhq';
 
 const lazyCircleUserList = ref([]);
 const lazyCircleUserData = ref({});
+const userFollowList = ref([]);
+const userFollowData = ref({});
 const {proxy} = getCurrentInstance();
-const loading = ref(true);
-const dialog = ref({photo: false, userDetail: false, updateToUser: false});
+const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true});
+const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false});
 const photoList = ref([]);
 const showSearch = ref(true);
 const total = ref(0);
+const totalUserFollow = ref(0);
 const dateRange = ref({updateTime: [], birthday: []});
 const data = reactive({
   form: {},
@@ -341,6 +382,7 @@ const data = reactive({
     age: null,
     startAge: null,
     endAge: 27,
+    profession: null,
     startUpdateTime: null,
     endUpdateTime: null,
     startBirthday: null,
@@ -350,9 +392,16 @@ const data = reactive({
 const specifyUserData = ref({toUserId: null, userId: null, sameUserFlag: true, userData: null});
 
 const {queryParams, form, rules} = toRefs(data);
+const queryParamUserFollow = ref({
+  pageIndex: 1,
+  pageSize: 20,
+  followType: 1,
+  status: 1,
+  toFollowId: ''
+});
 
 function getList() {
-  loading.value = true;
+  loading.value.loadTable = true;
   const dateRangeValue = dateRange.value;
   getListLazyCircleUser({
     ...queryParams.value,
@@ -364,7 +413,47 @@ function getList() {
     //console.log("getListLazyCircleUser---response", response);
     lazyCircleUserList.value = response.data.data;
     total.value = response.data.count;
-    loading.value = false;
+    loading.value.loadTable = false;
+  });
+}
+
+//获取关注列表数据
+function getUserFollowList() {
+  loading.value.loadUserFollowTable = true;
+  getListUserFollow({
+    ...queryParamUserFollow.value
+  }).then(response => {
+    userFollowList.value = response.data.data;
+    totalUserFollow.value = response.data.count;
+    loading.value.loadUserFollowTable = false;
+  });
+}
+
+//查看我的关注列表
+function handleUserFollowList() {
+  dialog.value.userFollow = true;
+  getUserFollowList();
+}
+
+//查看关注列表-照片信息
+function handleUserFollowPhoto(toUserId) {
+  getLazyCircleUserByUserId({userId: toUserId}).then(response => {
+    if (response.data) {
+      handlePhoto(response.data);
+    } else {
+      proxy.$modal.msgWarning("编号【" + toUserId + "】信息不存在");
+    }
+  });
+}
+
+//查看关注列表-用户详情
+function handleUserFollow(toUserId) {
+  getLazyCircleUserByUserId({userId: toUserId}).then(response => {
+    if (response.data) {
+      handleDetail(response.data);
+    } else {
+      proxy.$modal.msgWarning("编号【" + toUserId + "】信息不存在");
+    }
   });
 }
 
@@ -384,7 +473,7 @@ function handleUpdateSpecifyUser() {
 
 //提交更新指定用户信息
 function submitUpdateSpecifyUser() {
-  if(specifyUserData.value.toUserId){
+  if (specifyUserData.value.toUserId) {
     proxy.$modal.confirm('确认要更新编码[' + specifyUserData.value.toUserId + ']信息么?').then(function () {
       return updateLhqUser({toUserId: specifyUserData.value.toUserId, userId: specifyUserData.value.sameUserFlag ? specifyUserData.value.toUserId : specifyUserData.value.userId});
     }).then(response => {
@@ -393,9 +482,40 @@ function submitUpdateSpecifyUser() {
       getList();
     }).catch(function () {
     });
-  }else{
+  } else {
     proxy.$modal.msgWarning("toUserId 必须指定");
   }
+}
+
+//获取关注信息
+function getUserFollowInfo(toUserId) {
+  loading.value.loadUserFollow = true;
+  userFollowData.value = null;
+  getUserFollow(toUserId).then(response => {
+    userFollowData.value = response.data;
+    //console.log("getUserFollowInfo---response", response, ",userFollowStatusName:", userFollowData.value);
+    loading.value.loadUserFollow = false;
+  }).catch(function () {
+    loading.value.loadUserFollow = false;
+  });
+}
+
+//关注用户
+function handleInsertUserFollow(toUserId, loadFlag = false) {
+  proxy.$modal.confirm('确定要操作[' + toUserId + ']信息么?').then(function () {
+    loading.value.loadUserFollow = true;
+    userFollowData.value = null;
+    return insertUserFollow({followType: 1, toFollowId: toUserId});
+  }).then(response => {
+    userFollowData.value = response.data;
+    proxy.$modal.msgSuccess(response.msg);
+    loading.value.loadUserFollow = false;
+    if (loadFlag) {
+      getUserFollowList();
+    }
+  }).catch(function () {
+    loading.value.loadUserFollow = false;
+  });
 }
 
 function handleUpdate(row) {
@@ -410,6 +530,7 @@ function handleUpdate(row) {
 }
 
 function handleDetail(row) {
+  getUserFollowInfo(row.userId);
   lazyCircleUserData.value = row;
   dialog.value.userDetail = true;
 }
