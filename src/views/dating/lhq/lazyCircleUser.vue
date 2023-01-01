@@ -542,6 +542,7 @@ function handlePhoto(row) {
     if (!dialog.value.userDetail) {
       lazyCircleUserData.value = row;
     }
+    getUserFollowInfo(row.userId);
     dialog.value.photo = true;
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
