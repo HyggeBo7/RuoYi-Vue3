@@ -253,6 +253,7 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
+          <el-button type="primary" :loading="loading.loadUserFollow" @click="handleInsertUserFollow(lazyCircleUserData.userId)">{{ userFollowData && userFollowData.status === 1 ? "取消关注" : "关注" }}</el-button>
           <el-button type="warning" @click="handleLastNext(true)">上一个</el-button>
           <el-button type="danger" @click="handleLastNext(false)">下一个</el-button>
           <el-button v-if="!dialog.userDetail" type="primary" @click="handleDetail(lazyCircleUserData)">查看详情</el-button>
@@ -561,6 +562,7 @@ function handleLastNext(lastFlag = false) {
         photoList.value = [];
       }
     }
+    getUserFollowInfo(currentLazyCircleUserData.userId);
     lazyCircleUserData.value = currentLazyCircleUserData;
   } else {
     proxy.$modal.msgWarning(lastFlag ? "当前没有上一个用户信息" : "当前没有下一个用户信息");
