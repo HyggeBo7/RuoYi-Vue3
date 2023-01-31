@@ -62,3 +62,23 @@ export function insertUserFollow(data) {
     data: {...data, followId: useUserStore().userId}
   })
 }
+
+//获取随机推送用户信息
+export function getListRandomUser(data) {
+  return request({
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    url: '/lhq/listRandomUser',
+    method: 'post',
+    data: data
+  })
+}
+
+//获取上墙用户信息
+export function getListCoverUser(data) {
+  return request({
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    url: '/lhq/listCoverUser',
+    method: 'post',
+    data: data
+  })
+}

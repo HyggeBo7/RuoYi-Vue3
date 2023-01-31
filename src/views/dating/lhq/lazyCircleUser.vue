@@ -87,6 +87,7 @@
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           <el-button type="warning" icon="Edit" @click="handleUpdateSpecifyUser">更新指定信息</el-button>
           <el-button type="primary" @click="handleUserFollowList">关注列表</el-button>
+          <!--<el-button type="primary" @click="handleUserFollowList">上墙信息</el-button>-->
         </div>
       </el-form-item>
     </el-form>
@@ -170,6 +171,35 @@
         v-model:limit="queryParams.pageSize"
         @pagination="getList"
     />
+
+<!--    <el-dialog title="上墙列表" v-model="dialog.userCover" append-to-body>
+      <div>
+        <el-table v-loading="loading.loadUserFollowTable" :data="userFollowList">
+          <el-table-column label="序号" type="index" width="50"/>
+          <el-table-column label="关注编号" prop="toFollowId"/>
+          <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
+            <template #default="scope">
+              <el-button type="warning" link icon="Edit" title="取消关注" @click="handleInsertUserFollow(scope.row.toFollowId,true)"></el-button>
+              <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserFollowPhoto(scope.row.toFollowId)"></el-button>
+              <el-button type="success" link icon="View" title="详情" @click="handleUserFollow(scope.row.toFollowId)"></el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+            v-show="totalUserFollow > 0"
+            :total="totalUserFollow"
+            v-model:page="queryParamUserFollow.pageIndex"
+            v-model:limit="queryParamUserFollow.pageSize"
+            @pagination="getUserFollowList"
+        />
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialog.userFollow=false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>-->
 
     <el-dialog title="我的关注列表" v-model="dialog.userFollow" append-to-body>
       <div>
@@ -359,7 +389,7 @@ const userFollowList = ref([]);
 const userFollowData = ref({});
 const {proxy} = getCurrentInstance();
 const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true});
-const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false});
+const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false, userCover: false});
 const photoList = ref([]);
 const showSearch = ref(true);
 const total = ref(0);
