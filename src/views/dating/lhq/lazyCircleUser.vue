@@ -87,7 +87,7 @@
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           <el-button type="warning" icon="Edit" @click="handleUpdateSpecifyUser">更新指定信息</el-button>
           <el-button type="primary" @click="handleUserFollowList">关注列表</el-button>
-          <!--<el-button type="primary" @click="handleUserFollowList">上墙信息</el-button>-->
+          <el-button type="primary" @click="handleUserCoverList">上墙信息</el-button>
         </div>
       </el-form-item>
     </el-form>
@@ -172,34 +172,75 @@
         @pagination="getList"
     />
 
-<!--    <el-dialog title="上墙列表" v-model="dialog.userCover" append-to-body>
+    <el-dialog title="上墙列表" v-model="dialog.userCover" append-to-body width="80%">
       <div>
-        <el-table v-loading="loading.loadUserFollowTable" :data="userFollowList">
-          <el-table-column label="序号" type="index" width="50"/>
-          <el-table-column label="关注编号" prop="toFollowId"/>
-          <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
-            <template #default="scope">
-              <el-button type="warning" link icon="Edit" title="取消关注" @click="handleInsertUserFollow(scope.row.toFollowId,true)"></el-button>
-              <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserFollowPhoto(scope.row.toFollowId)"></el-button>
-              <el-button type="success" link icon="View" title="详情" @click="handleUserFollow(scope.row.toFollowId)"></el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-            v-show="totalUserFollow > 0"
-            :total="totalUserFollow"
-            v-model:page="queryParamUserFollow.pageIndex"
-            v-model:limit="queryParamUserFollow.pageSize"
-            @pagination="getUserFollowList"
-        />
+        <div>
+          <el-form :model="queryParamCover" :inline="true">
+            <!--<el-form-item label="编码" prop="userId">
+              <el-input v-model="queryParamCover.userId" placeholder="请输入编码(数字)" clearable style="width: 240px" @keyup.enter="handleUserCoverList"/>
+            </el-form-item>-->
+            <el-form-item label="城市" prop="city">
+              <el-select v-model="queryParamCover.city" placeholder="请选择城市" style="width: 240px" @change="handleUserCoverList">
+                <el-option v-for="dict in [{'value':'重庆','label':'重庆'},{'value':'成都','label':'成都'},{'value':'深圳','label':'深圳'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="性别" prop="gender">
+              <el-select v-model="queryParamCover.gender" placeholder="请选择性别" style="width: 240px" @change="handleUserCoverList">
+                <el-option v-for="dict in [{'value':2,'label':'女'},{'value':1,'label':'男'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="dr-page_scroll">
+          <div class="dr-page_wrap">
+            <el-row>
+              <el-col :span="8" v-for="(itemCover,index) in userCoverList" style="padding: 5px">
+                <el-card>
+                  <el-image :key="itemCover.id" :src="itemCover.image"/>
+                  <div style="padding: 14px">
+                    <div>
+                      <label>{{ index + 1 }}：</label>
+                      <span v-if="itemCover.url">
+                        <el-link :href="itemCover.url" target="_blank" type="primary"> {{ itemCover.name }}</el-link>
+                      </span>
+                      <span v-else :title="itemCover.url">
+                        {{ itemCover.name }}
+                      </span>
+                    </div>
+                    <div style="padding: 5px">
+                      <el-row gutter="1">
+                        <el-col :span="12"><label>邮箱：</label><span>{{ itemCover.email }}</span></el-col>
+                        <el-col :span="12"><label>日期：</label><span>{{ itemCover.create_time_text }}</span></el-col>
+                        <el-col :span="12"><label>城市：</label><span>{{ itemCover.city }}</span></el-col>
+                        <el-col :span="12"><label>性别：</label><span>{{ itemCover.gender === 2 ? "女" : itemCover.gender === 1 ? "男" : "未知-" + itemCover.gender }}</span></el-col>
+                        <el-col :span="24" v-if="itemCover.email">
+                          <label>操作：</label>
+                          <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserCoverInfoOrPhoto(itemCover.email,true)"></el-button>
+                          <el-button type="success" link icon="View" title="详情" @click="handleUserCoverInfoOrPhoto(itemCover.email)"></el-button>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+            <div style="text-align: center;margin: 10px;padding: 10px 0">
+              <div v-if="noMore.userCoverNoMore"><p style="color: crimson;">没有更多了...<label v-if="userCoverList.length > 0">当前共<label style="font-weight: bold;color: red;">{{ userCoverList.length }}</label>条</label></p></div>
+              <el-button v-else type="primary" link :loading="loading.loadUserCover" @click="getUserCoverList()">
+                {{ loading.loadUserCover ? "加载中..." : "点击查询更多..." }}
+                <label v-if="userCoverList.length > 0">当前共<label style="font-weight: bold;color: red;">{{ userCoverList.length }}</label>条</label>
+              </el-button>
+            </div>
+          </div>
+        </div>
+        <el-backtop target=".dr-page_scroll .dr-page_wrap" :right="100" :bottom="100"/>
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="dialog.userFollow=false">关闭</el-button>
+          <el-button @click="dialog.userCover=false">关闭</el-button>
         </div>
       </template>
-    </el-dialog>-->
+    </el-dialog>
 
     <el-dialog title="我的关注列表" v-model="dialog.userFollow" append-to-body>
       <div>
@@ -381,15 +422,17 @@
 </template>
 
 <script setup name="Lhq">
-import {getListLazyCircleUser, updateLhqUser, getUserFollow, insertUserFollow, getListUserFollow, getLazyCircleUserByUserId} from '@/api/lhq';
+import {getLazyCircleUserByUserId, getListCoverUser, getListLazyCircleUser, getListUserFollow, getUserFollow, insertUserFollow, updateLhqUser} from '@/api/lhq';
 
 const lazyCircleUserList = ref([]);
 const lazyCircleUserData = ref({});
 const userFollowList = ref([]);
 const userFollowData = ref({});
+const userCoverList = ref([]);
 const {proxy} = getCurrentInstance();
-const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true});
+const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true, loadUserCover: true});
 const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false, userCover: false});
+const noMore = ref({userCoverNoMore: false});
 const photoList = ref([]);
 const showSearch = ref(true);
 const total = ref(0);
@@ -430,6 +473,13 @@ const queryParamUserFollow = ref({
   status: 1,
   toFollowId: ''
 });
+const queryParamCover = ref({
+  pageIndex: 1,
+  pageSize: 10,
+  gender: 2,
+  city: "重庆",
+  userId: null
+});
 
 function getList() {
   loading.value.loadTable = true;
@@ -446,6 +496,50 @@ function getList() {
     total.value = response.data.count;
     loading.value.loadTable = false;
   });
+}
+
+//查看上墙列表-用户详情、照片信息
+function handleUserCoverInfoOrPhoto(email, photoFlag = false) {
+  getListLazyCircleUser({eqEmail: email}).then(response => {
+    if (response.data && response.data.count && response.data.count > 0) {
+      let firstData = response.data.data[0];
+      if (photoFlag) {
+        handlePhoto(firstData);
+      } else {
+        handleDetail(firstData);
+      }
+    } else {
+      proxy.$modal.msgWarning("邮箱【" + email + "】信息不存在");
+    }
+  });
+}
+
+//加载上墙列表
+function getUserCoverList() {
+  loading.value.loadUserCover = true;
+  queryParamCover.value.pageIndex = ++queryParamCover.value.pageIndex;
+  getListCoverUser(queryParamCover.value).then(response => {
+    if (response.data) {
+      userCoverList.value = userCoverList.value.concat(response.data);
+      if (response.data.length < queryParamCover.value.pageSize) {
+        noMore.value.userCoverNoMore = true;
+      }
+    } else {
+      noMore.value.userCoverNoMore = true;
+    }
+    loading.value.loadUserCover = false;
+  });
+}
+
+//上墙列表
+function handleUserCoverList() {
+  if (!dialog.value.userCover) {
+    dialog.value.userCover = true;
+    noMore.value.userCoverNoMore = false;
+  }
+  userCoverList.value = [];
+  queryParamCover.value.pageIndex = 0;
+  getUserCoverList();
 }
 
 //获取关注列表数据
@@ -624,5 +718,14 @@ getList();
 
 .demo-image__lazy .el-image:last-child {
   margin-bottom: 0;
+}
+
+.dr-page_scroll {
+  height: 600px;
+}
+
+.dr-page_wrap {
+  overflow-y: scroll;
+  height: 100%;
 }
 </style>
