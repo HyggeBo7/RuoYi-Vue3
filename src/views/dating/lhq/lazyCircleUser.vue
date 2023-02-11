@@ -45,6 +45,9 @@
           <el-form-item label="邮箱" prop="email">
             <el-input v-model="queryParams.email" placeholder="请输入邮箱(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
           </el-form-item>
+          <el-form-item label="籍贯" prop="hometown">
+            <el-input v-model="queryParams.hometown" placeholder="请输入籍贯(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
           <el-form-item label="更新时间" style="width: 318px">
             <el-date-picker
                 v-model="dateRange.updateTime"
@@ -102,22 +105,26 @@
           <div style="padding: 10px 20px;">{{ props.row }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="序号" type="index" width="50"/>
+      <el-table-column align="left" header-align="center" type="index" width="56" label="序号">
+        <template #default="scope">
+          <div style="cursor:pointer" :title="scope.row.userId" v-copyText="scope.row.userId" v-copyText:callback="copyTextSuccess">{{ (queryParams.pageIndex - 1) * queryParams.pageSize + scope.$index + 1 }}</div>
+        </template>
+      </el-table-column>
       <el-table-column label="头像" align="center" idth="30">
         <template #default="scope">
-          <div @click="handlePhoto(scope.row)" style="cursor: pointer">
+          <div :title="scope.row.gender === 2 ? '女' : scope.row.gender === 1 ? '男' : '未知-' + scope.row.gender" @click="handlePhoto(scope.row)" style="cursor: pointer">
             <el-avatar :src="scope.row.avatar"/>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="编码" prop="userId"/>
+      <!--<el-table-column label="编码" prop="userId"/>-->
       <el-table-column label="昵称" prop="name" width="120" :show-overflow-tooltip="true"/>
-      <el-table-column label="性别" prop="gender">
+      <!--<el-table-column label="性别" prop="gender" width="60">
         <template #default="scope">
           <span>{{ scope.row.gender === 2 ? '女' : scope.row.gender === 1 ? '男' : '未知-' + scope.row.gender }}</span>
         </template>
-      </el-table-column>
-      <el-table-column label="年龄" prop="age"/>
+      </el-table-column>-->
+      <el-table-column label="年龄" prop="age" width="60" />
       <el-table-column label="职业" prop="profession" width="100" :show-overflow-tooltip="true"/>
       <el-table-column label="婚姻状态" prop="marriage"/>
       <el-table-column label="身高" prop="height">
@@ -127,13 +134,14 @@
       </el-table-column>
       <el-table-column label="体重" prop="weight"/>
       <el-table-column label="星座" prop="constellation"/>
-      <el-table-column label="学历" prop="education"/>
+      <el-table-column label="学历" prop="education" width="90"/>
       <el-table-column label="收入范围" prop="income" width="100" :show-overflow-tooltip="true"/>
       <el-table-column label="车/房" prop="house" width="80" :show-overflow-tooltip="true">
         <template #default="scope">
           <span>{{ scope.row.car }}/{{ scope.row.house }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="籍贯" prop="hometown" :show-overflow-tooltip="true"/>
       <!--<el-table-column label="显示顺序" prop="roleSort" width="100"/>
       <el-table-column label="状态" align="center" width="100">
         <template #default="scope">
@@ -150,7 +158,7 @@
           <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="同步日期" align="center" prop="sysUpdateTime" :show-overflow-tooltip="true" width="100">
+      <el-table-column label="同步日期" align="center" prop="sysUpdateTime" :show-overflow-tooltip="true">
         <template #default="scope">
           <span>{{ parseTime(scope.row.sysUpdateTime) }}</span>
         </template>
@@ -448,6 +456,7 @@ const data = reactive({
     wechat: null,
     phone: null,
     email: null,
+    hometown: null,
     city: "重庆",
     gender: 2,
     userId: null,
@@ -496,6 +505,11 @@ function getList() {
     total.value = response.data.count;
     loading.value.loadTable = false;
   });
+}
+
+//复制
+function copyTextSuccess(value) {
+  proxy.$modal.msgSuccess("复制编号【" + value + "】成功");
 }
 
 //查看上墙列表-用户详情、照片信息
