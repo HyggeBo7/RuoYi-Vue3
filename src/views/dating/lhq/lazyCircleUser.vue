@@ -19,8 +19,8 @@
               <el-form-item label="星座" prop="constellation">
                 <el-select v-model="queryParams.constellation" placeholder="请选择星座" clearable style="width: 240px" @change="handleQuery">
                   <el-option
-                      v-for="dict in [{'value':'白羊座','label':'白羊座(0321-0419)'},{'value':'金牛座','label':'金牛座(0420-0520)'},{'value':'双子座','label':'双子座(0521-0621)'},{'value':'巨蟹座','label':'巨蟹座(0622-0722)'},{'value':'狮子座','label':'狮子座(0723-0822)'},{'value':'处女座','label':'处女座(0823-0922)'},{'value':'天枰座','label':'天枰座(0923-1023)'},{'value':'天蝎座','label':'天蝎座(1024-1122)'},{'value':'射手座','label':'射手座(1123-1221)'},{'value':'摩羯座','label':'摩羯座(1222-0119)'},{'value':'水瓶座','label':'水瓶座(0120-0218)'},{'value':'双鱼座','label':'双鱼座(0219-0320)'}]"
-                      :key="dict.value" :label="dict.label" :value="dict.value"/>
+                    v-for="dict in [{'value':'白羊座','label':'白羊座(0321-0419)'},{'value':'金牛座','label':'金牛座(0420-0520)'},{'value':'双子座','label':'双子座(0521-0621)'},{'value':'巨蟹座','label':'巨蟹座(0622-0722)'},{'value':'狮子座','label':'狮子座(0723-0822)'},{'value':'处女座','label':'处女座(0823-0922)'},{'value':'天枰座','label':'天枰座(0923-1023)'},{'value':'天蝎座','label':'天蝎座(1024-1122)'},{'value':'射手座','label':'射手座(1123-1221)'},{'value':'摩羯座','label':'摩羯座(1222-0119)'},{'value':'水瓶座','label':'水瓶座(0120-0218)'},{'value':'双鱼座','label':'双鱼座(0219-0320)'}]"
+                    :key="dict.value" :label="dict.label" :value="dict.value"/>
                 </el-select>
               </el-form-item>
               <el-form-item label="性别" prop="gender">
@@ -50,22 +50,22 @@
           </el-form-item>
           <el-form-item label="更新时间" style="width: 318px">
             <el-date-picker
-                v-model="dateRange.updateTime"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                type="datetimerange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
+              v-model="dateRange.updateTime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="datetimerange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
           <el-form-item label="生日" style="width: 308px">
             <el-date-picker
-                v-model="dateRange.birthday"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
+              v-model="dateRange.birthday"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
           <el-form-item label="年龄" prop="startAge">
@@ -77,6 +77,11 @@
           <el-form-item label="过滤照片" prop="photoValueFlag">
             <el-select v-model="queryParams.photoValueFlag" placeholder="是否过滤照片" clearable style="width: 240px" @change="handleQuery">
               <el-option v-for="dict in [{'value':true,'label':'过滤空照片'},{'value':false,'label':'不过滤空照片'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="过滤修改时间" prop="filterUpdateTime">
+            <el-select v-model="queryParams.filterUpdateTime" placeholder="请选择过滤时间" clearable style="width: 240px" @change="handleQuery">
+              <el-option v-for="dict in [{'value':0,'label':'过滤空'},{'value':1,'label':'一年内'},{'value':2,'label':'两年内'},{'value':3,'label':'三年内'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
             </el-select>
           </el-form-item>
           <el-form-item label="排序" prop="orderBy">
@@ -124,7 +129,7 @@
           <span>{{ scope.row.gender === 2 ? '女' : scope.row.gender === 1 ? '男' : '未知-' + scope.row.gender }}</span>
         </template>
       </el-table-column>-->
-      <el-table-column label="年龄" prop="age" width="60" />
+      <el-table-column label="年龄" prop="age" width="60"/>
       <el-table-column label="职业" prop="profession" width="100" :show-overflow-tooltip="true"/>
       <el-table-column label="婚姻状态" prop="marriage"/>
       <el-table-column label="身高" prop="height">
@@ -173,11 +178,11 @@
     </el-table>
 
     <pagination
-        v-show="total > 0"
-        :total="total"
-        v-model:page="queryParams.pageIndex"
-        v-model:limit="queryParams.pageSize"
-        @pagination="getList"
+      v-show="total > 0"
+      :total="total"
+      v-model:page="queryParams.pageIndex"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
     />
 
     <el-dialog title="上墙列表" v-model="dialog.userCover" append-to-body width="80%">
@@ -255,7 +260,12 @@
         <el-table v-loading="loading.loadUserFollowTable" :data="userFollowList">
           <el-table-column label="序号" type="index" width="50"/>
           <!--<el-table-column label="关注者编号" prop="followId"/>-->
-          <el-table-column label="关注编号" prop="toFollowId"/>
+          <el-table-column label="关注编号" align="center" prop="toFollowId"/>
+          <el-table-column label="关注时间" align="center">
+            <template #default="scope">
+              <span>{{ parseTime(scope.row.updateDate ? scope.row.updateDate : scope.row.createDate) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
             <template #default="scope">
               <el-button type="warning" link icon="Edit" title="取消关注" @click="handleInsertUserFollow(scope.row.toFollowId,true)"></el-button>
@@ -266,11 +276,11 @@
         </el-table>
 
         <pagination
-            v-show="totalUserFollow > 0"
-            :total="totalUserFollow"
-            v-model:page="queryParamUserFollow.pageIndex"
-            v-model:limit="queryParamUserFollow.pageSize"
-            @pagination="getUserFollowList"
+          v-show="totalUserFollow > 0"
+          :total="totalUserFollow"
+          v-model:page="queryParamUserFollow.pageIndex"
+          v-model:limit="queryParamUserFollow.pageSize"
+          @pagination="getUserFollowList"
         />
       </div>
       <template #footer>
@@ -313,12 +323,12 @@
       <div style="text-align: center;font-weight: bold;">
         <span style="margin: 0 10px;">{{ lazyCircleUserData.name }}</span>
         <el-image
-            style="width: 66px; height: 56px;"
-            :src="lazyCircleUserData.avatar"
-            alt="预览照片"
-            title="预览照片"
-            :preview-src-list="photoList.map(d=>d.url)"
-            fit="cover"/>
+          style="width: 66px; height: 56px;"
+          :src="lazyCircleUserData.avatar"
+          alt="预览照片"
+          title="预览照片"
+          :preview-src-list="photoList.map(d=>d.url)"
+          fit="cover"/>
         <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
         <span style="margin: 0 10px;"><label style="color: #F56C6C">{{ lazyCircleUserList.indexOf(lazyCircleUserData) + 1 }}</label> / {{ lazyCircleUserList.length }}</span>
       </div>
@@ -469,7 +479,8 @@ const data = reactive({
     startUpdateTime: null,
     endUpdateTime: null,
     startBirthday: null,
-    endBirthday: null
+    endBirthday: null,
+    filterUpdateTime: 0
   }
 });
 const specifyUserData = ref({toUserId: null, userId: null, sameUserFlag: true, userData: null});
@@ -720,26 +731,26 @@ getList();
 </script>
 <style scoped>
 .demo-image__lazy {
-  height: 600px;
-  overflow-y: auto;
+    height: 600px;
+    overflow-y: auto;
 }
 
 .demo-image__lazy .el-image {
-  display: block;
-  min-height: 280px;
-  margin-bottom: 20px;
+    display: block;
+    min-height: 280px;
+    margin-bottom: 20px;
 }
 
 .demo-image__lazy .el-image:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .dr-page_scroll {
-  height: 600px;
+    height: 600px;
 }
 
 .dr-page_wrap {
-  overflow-y: scroll;
-  height: 100%;
+    overflow-y: scroll;
+    height: 100%;
 }
 </style>
