@@ -546,9 +546,7 @@ function getUserCoverList() {
   getListCoverUser(queryParamCover.value).then(response => {
     if (response.data) {
       userCoverList.value = userCoverList.value.concat(response.data);
-      if (response.data.length < queryParamCover.value.pageSize) {
-        noMore.value.userCoverNoMore = true;
-      }
+      noMore.value.userCoverNoMore = response.data.length < queryParamCover.value.pageSize;
     } else {
       noMore.value.userCoverNoMore = true;
     }
