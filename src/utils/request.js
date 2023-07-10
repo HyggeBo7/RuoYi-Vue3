@@ -7,6 +7,7 @@ import cache from '@/plugins/cache'
 import { saveAs } from 'file-saver'
 import useUserStore from '@/store/modules/user'
 import qs from 'qs'
+import globalConfig from '../../config'
 
 let downloadLoadingInstance;
 // 是否显示重新登录
@@ -100,7 +101,8 @@ service.interceptors.response.use(res => {
         ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
           isRelogin.show = false;
           useUserStore().logOut().then(() => {
-            location.href = '/index';
+            //location.href = '/index';
+            location.href = globalConfig.indexUrl;
           })
       }).catch(() => {
         isRelogin.show = false;
