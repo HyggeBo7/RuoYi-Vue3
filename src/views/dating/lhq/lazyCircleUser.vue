@@ -442,7 +442,7 @@
 
 <script setup name="Lhq">
 import {getLazyCircleUserByUserId, getListCoverUser, getListLazyCircleUser, getListUserFollow, getUserFollow, insertUserFollow, updateLhqUser} from '@/api/lhq';
-import {getQueryObject} from "@/utils";
+import {getQueryObject, param} from "@/utils";
 
 const lazyCircleUserList = ref([]);
 const lazyCircleUserData = ref({});
@@ -697,7 +697,15 @@ function handlePhoto(row) {
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
   }
-  userShareUrl.value = window.location.href + '?userId=' + row.userId;
+  let url = window.location.href;
+  if (url.indexOf("userId=") > 0) {
+    let queryObject = getQueryObject(url);
+    queryObject['userId'] = row.userId;
+    url = url.substring(0, url.indexOf("?")) + '?' + param(queryObject)
+  } else {
+    url = window.location.href + '?userId=' + row.userId;
+  }
+  userShareUrl.value = url;
 }
 
 //上/下一个用户信息
