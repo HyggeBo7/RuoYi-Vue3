@@ -331,6 +331,7 @@
           fit="cover"/>
         <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
         <span style="margin: 0 10px;"><label style="color: #F56C6C">{{ lazyCircleUserList.indexOf(lazyCircleUserData) + 1 }}</label> / {{ lazyCircleUserList.length }}</span>
+        <el-button v-if="userShareUrl" type="primary" icon="Share" size="small" circle v-copyText="userShareUrl" v-copyText:callback="copyTextSuccess" title="分享链接"/>
       </div>
       <div class="demo-image__lazy">
         <div v-for="item in photoList">
@@ -441,6 +442,7 @@
 
 <script setup name="Lhq">
 import {getLazyCircleUserByUserId, getListCoverUser, getListLazyCircleUser, getListUserFollow, getUserFollow, insertUserFollow, updateLhqUser} from '@/api/lhq';
+import {getQueryObject} from "@/utils";
 
 const lazyCircleUserList = ref([]);
 const lazyCircleUserData = ref({});
@@ -453,6 +455,7 @@ const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFo
 const noMore = ref({userCoverNoMore: false});
 const photoList = ref([]);
 const showSearch = ref(true);
+const userShareUrl = ref('');
 const total = ref(0);
 const totalUserFollow = ref(0);
 const dateRange = ref({updateTime: [], birthday: []});
@@ -520,7 +523,7 @@ function getList() {
 
 //复制
 function copyTextSuccess(value) {
-  proxy.$modal.msgSuccess("复制编号【" + value + "】成功");
+  proxy.$modal.msgSuccess("复制【" + value + "】成功");
 }
 
 //查看上墙列表-用户详情、照片信息
@@ -694,6 +697,7 @@ function handlePhoto(row) {
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
   }
+  userShareUrl.value = window.location.href + '?userId=' + row.userId;
 }
 
 //上/下一个用户信息
@@ -725,7 +729,16 @@ function resetQuery() {
   handleQuery();
 }
 
-getList();
+//初始化加载界面
+function initView() {
+  let queryObject = getQueryObject();
+  if (queryObject && queryObject.userId) {
+    queryParams.value.userId = queryObject.userId;
+  }
+  getList();
+}
+
+initView();
 </script>
 <style scoped>
 .demo-image__lazy {
