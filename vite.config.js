@@ -33,12 +33,12 @@ export default defineConfig(({ mode, command }) => {
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
-          target: 'https://xfyl.wubo777.top',
+          target: 'https://xfyl.dearbo.top',
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, 'bo-api-ry-admin')
         },
         '/bo-api-xfylw':{
-          target: 'https://xfyl.wubo777.top',
+          target: 'https://xfyl.dearbo.top',
           changeOrigin: true,
           rewrite: (p) => p
           //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, '')
