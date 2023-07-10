@@ -1,5 +1,5 @@
 const globalConfig = {
   publicPath: '/ry-admin/',
-  appTitle: '管理系统'
+  appTitle: '后台管理系统'
 }
 export default globalConfig
