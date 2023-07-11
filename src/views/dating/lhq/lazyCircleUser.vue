@@ -331,7 +331,7 @@
           fit="cover"/>
         <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
         <span style="margin: 0 10px;"><label style="color: #F56C6C">{{ lazyCircleUserList.indexOf(lazyCircleUserData) + 1 }}</label> / {{ lazyCircleUserList.length }}</span>
-        <el-button v-if="userShareUrl" type="primary" icon="Share" size="small" circle v-copyText="userShareUrl" v-copyText:callback="copyTextSuccess" title="分享链接"/>
+        <el-button v-if="userShareUrl" :key="userShareUrl" type="primary" icon="Share" size="small" circle v-copyText="userShareUrl" v-copyText:callback="copyTextSuccess" title="分享链接"/>
       </div>
       <div class="demo-image__lazy">
         <div v-for="item in photoList">
@@ -504,6 +504,17 @@ const queryParamCover = ref({
   userId: null
 });
 
+//监听 lazyCircleUserData 对象
+watch(
+  lazyCircleUserData,
+  (newValue, oldValue) => {
+    if (newValue && newValue.userId) {
+      setUserShareUrl(newValue);
+    }
+  },
+  {immediate: true}
+);
+
 function getList() {
   loading.value.loadTable = true;
   const dateRangeValue = dateRange.value;
@@ -524,6 +535,19 @@ function getList() {
 //复制
 function copyTextSuccess(value) {
   proxy.$modal.msgSuccess("复制【" + value + "】成功");
+}
+
+//分享内容
+function setUserShareUrl(data) {
+  let url = window.location.href;
+  if (url.indexOf("userId=") > 0) {
+    let queryObject = getQueryObject(url);
+    queryObject['userId'] = data.userId;
+    url = url.substring(0, url.indexOf("?")) + '?' + param(queryObject)
+  } else {
+    url = window.location.href + '?userId=' + data.userId;
+  }
+  userShareUrl.value = url;
 }
 
 //查看上墙列表-用户详情、照片信息
@@ -697,15 +721,6 @@ function handlePhoto(row) {
   } else {
     proxy.$modal.msgWarning("暂无相关照片");
   }
-  let url = window.location.href;
-  if (url.indexOf("userId=") > 0) {
-    let queryObject = getQueryObject(url);
-    queryObject['userId'] = row.userId;
-    url = url.substring(0, url.indexOf("?")) + '?' + param(queryObject)
-  } else {
-    url = window.location.href + '?userId=' + row.userId;
-  }
-  userShareUrl.value = url;
 }
 
 //上/下一个用户信息
