@@ -39,6 +39,7 @@ export default defineConfig(({ mode, command }) => {
         },
         '/bo-api-xfylw':{
           target: 'https://xfyl.dearbo.top',
+          //target: 'http://localhost:8020',
           changeOrigin: true,
           rewrite: (p) => p
           //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, '')

@@ -64,12 +64,24 @@ export function insertUserFollow(data) {
 }
 
 //获取随机推送用户信息
-export function getListRandomUser(data) {
+//type: 1：获取随机推送用户，2：获取随机用户,支持解锁(无解锁用户会提示异常)
+//city：重庆、成都、深圳
+export function getListRecommendedUser(data, type = '1') {
   return request({
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    url: '/lhq/listRandomUser',
+    url: '/lhq/listRecommendedUser',
     method: 'post',
-    data: data
+    data: {...data, type: type}
+  })
+}
+
+//助力推荐用户列表(userId给shareId助力)
+export function addRecommended(shareId, userId = null) {
+  return request({
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    url: '/lhq/addRecommended',
+    method: 'post',
+    data: {shareId: shareId, userId: userId}
   })
 }
 

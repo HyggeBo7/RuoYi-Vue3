@@ -31,7 +31,7 @@
             </div>
           </template>
           <el-form-item label="编码" prop="userId">
-            <el-input v-model="queryParams.userId" placeholder="请输入编码(数字)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+            <el-input v-model="queryParams.userId" placeholder="请输入编码(匹配)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
           </el-form-item>
           <el-form-item label="微信" prop="wechat">
             <el-input v-model="queryParams.wechat" placeholder="请输入微信(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
@@ -47,6 +47,15 @@
           </el-form-item>
           <el-form-item label="籍贯" prop="hometown">
             <el-input v-model="queryParams.hometown" placeholder="请输入籍贯(模糊)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="微信" prop="eqWechat">
+            <el-input v-model="queryParams.eqWechat" placeholder="请输入微信(匹配)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="邮箱" prop="eqEmail">
+            <el-input v-model="queryParams.eqEmail" placeholder="请输入邮箱(匹配)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
+          </el-form-item>
+          <el-form-item label="电话" prop="eqPhone">
+            <el-input v-model="queryParams.eqPhone" placeholder="请输入电话(匹配)" clearable style="width: 240px" @keyup.enter="handleQuery"/>
           </el-form-item>
           <el-form-item label="更新时间" style="width: 318px">
             <el-date-picker
@@ -168,10 +177,11 @@
           <span>{{ parseTime(scope.row.sysUpdateTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="80" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button type="warning" link icon="Edit" title="更新" @click="handleUpdate(scope.row)"></el-button>
           <el-button type="success" link icon="View" title="详情" @click="handleDetail(scope.row)"></el-button>
+          <el-button type="primary" link icon="StarFilled" title="推送" @click="handleUserRecommendedList(scope.row)"></el-button>
           <!--<el-button link icon="Picture" title="照片" @click="handlePhoto(scope.row)"></el-button>-->
         </template>
       </el-table-column>
@@ -228,8 +238,8 @@
                         <el-col :span="12"><label>性别：</label><span>{{ itemCover.gender === 2 ? "女" : itemCover.gender === 1 ? "男" : "未知-" + itemCover.gender }}</span></el-col>
                         <el-col :span="24" v-if="itemCover.email">
                           <label>操作：</label>
-                          <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserCoverInfoOrPhoto(itemCover.email,true)"></el-button>
-                          <el-button type="success" link icon="View" title="详情" @click="handleUserCoverInfoOrPhoto(itemCover.email)"></el-button>
+                          <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserCoverInfoOrPhoto({eqEmail:itemCover.email},true)"></el-button>
+                          <el-button type="success" link icon="View" title="详情" @click="handleUserCoverInfoOrPhoto({eqEmail:itemCover.email})"></el-button>
                         </el-col>
                       </el-row>
                     </div>
@@ -286,6 +296,117 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="dialog.userFollow=false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog title="推荐列表" v-model="dialog.userRecommended" append-to-body width="80%">
+      <div>
+        <div>
+          <el-form :model="queryParamRecommended" :inline="true">
+            <el-form-item label="城市" prop="city">
+              <el-select v-model="queryParamRecommended.city" placeholder="请选择城市" style="width: 240px" @change="handleUserRecommendedList">
+                <el-option v-for="dict in [{'value':'重庆','label':'重庆'},{'value':'成都','label':'成都'},{'value':'深圳','label':'深圳'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="性别" prop="gender">
+              <el-select v-model="queryParamRecommended.gender" placeholder="请选择性别" style="width: 240px" @change="handleUserRecommendedList">
+                <el-option v-for="dict in [{'value':2,'label':'女'},{'value':1,'label':'男'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="dr-page_scroll">
+          <div class="dr-page_wrap">
+            <div>剩余推荐数：<span style="color: #b41be2;font-weight: bold;">{{noMore.userRemainingNum}}</span> 位</div>
+            <el-row>
+              <el-col :span="8" v-for="(itemCover,index) in userRecommendedList" style="padding: 5px">
+                <el-card>
+                  <div style="padding: 14px">
+                    <div class="common-layout">
+                      <el-container>
+                        <el-container>
+                          <el-header>
+                            <label>{{ index + 1 }}：</label>
+                            <span>{{ itemCover.name }}</span> -
+                            <span>{{ itemCover.id }}</span>
+                          </el-header>
+                          <el-main>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.age }}岁 / </span>
+                              <span>{{ itemCover.height }}cm / </span>
+                              <span>{{ itemCover.weight }}</span>
+                            </el-tag>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.education }}</span>
+                            </el-tag>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.address }}</span>
+                            </el-tag>
+                          </el-main>
+                          <el-footer>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.address }}</span>
+                            </el-tag>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.constellation }}</span>
+                            </el-tag>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.profession }}</span>
+                            </el-tag>
+                            <el-tag type="info" round>
+                              <span>{{ itemCover.email }}</span>
+                            </el-tag>
+                          </el-footer>
+                        </el-container>
+                        <el-aside width="100px">
+                          <el-avatar shape="square" :size="100" fit="fill" :src="itemCover.avatar"/>
+                        </el-aside>
+                      </el-container>
+                    </div>
+                    <div style="padding: 5px">
+                      <el-row gutter="1">
+                        <el-col :span="24"><label>关于我：</label><span>{{ itemCover.describe }}</span></el-col>
+                        <el-col :span="24"><label>希望你：</label><span>{{ itemCover.rOthers }}</span></el-col>
+                        <el-col :span="24" v-if="itemCover.id">
+                          <label>操作：</label>
+                          <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserCoverInfoOrPhoto({userId:itemCover.id},true)"></el-button>
+                          <el-button type="success" link icon="View" title="详情" @click="handleUserCoverInfoOrPhoto({userId:itemCover.id})"></el-button>
+                          <el-button type="warning" link icon="Edit" title="更新" @click="handleUpdate({userId:itemCover.id})"></el-button>
+                        </el-col>
+                        <el-col :span="24" v-if="itemCover.photos">
+                          <el-image
+                            v-for="(item,index) in JSON.parse(itemCover.photos)"
+                            :key="item.url"
+                            style="width: 100px; height: 100px"
+                            :src="item.url"
+                            :zoom-rate="1.2"
+                            :initial-index="4"
+                            fit="cover"
+                          />
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+            <div style="text-align: center;margin: 10px;padding: 10px 0">
+              <el-button v-if="noMore.userRemainingNum > 0" type="primary" link :loading="loading.loadUserRecommended" @click="getRecommendedUserList(true)">
+                {{ loading.loadUserRecommended ? "加载中..." : "点击加载更多..." }}
+              </el-button>
+              <el-button v-else type="primary" link :loading="loading.loadUserRecommended" @click="getAddRecommended()">
+                {{ loading.loadUserRecommended ? "加载中..." : "随机分享加载更多..." }}
+              </el-button>
+              <label v-if="userRecommendedList.length > 0">当前共<label style="font-weight: bold;color: red;">{{ userRecommendedList.length }}</label>条</label>
+            </div>
+          </div>
+        </div>
+        <el-backtop target=".dr-page_scroll .dr-page_wrap" :right="100" :bottom="100"/>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialog.userRecommended=false">关闭</el-button>
         </div>
       </template>
     </el-dialog>
@@ -441,7 +562,7 @@
 </template>
 
 <script setup name="Lhq">
-import {getLazyCircleUserByUserId, getListCoverUser, getListLazyCircleUser, getListUserFollow, getUserFollow, insertUserFollow, updateLhqUser} from '@/api/lhq';
+import {addRecommended, getLazyCircleUserByUserId, getListCoverUser, getListLazyCircleUser, getListRecommendedUser, getListUserFollow, getUserFollow, insertUserFollow, updateLhqUser} from '@/api/lhq';
 import {getQueryObject, param} from "@/utils";
 
 const lazyCircleUserList = ref([]);
@@ -449,10 +570,11 @@ const lazyCircleUserData = ref({});
 const userFollowList = ref([]);
 const userFollowData = ref({});
 const userCoverList = ref([]);
+const userRecommendedList = ref([]);
 const {proxy} = getCurrentInstance();
-const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true, loadUserCover: true});
-const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false, userCover: false});
-const noMore = ref({userCoverNoMore: false});
+const loading = ref({loadTable: true, loadUserFollow: true, loadUserFollowTable: true, loadUserCover: true, loadUserRecommended: true});
+const dialog = ref({photo: false, userDetail: false, updateToUser: false, userFollow: false, userCover: false, userRecommended: false});
+const noMore = ref({userCoverNoMore: false, userRemainingNum: 0});
 const photoList = ref([]);
 const showSearch = ref(true);
 const userShareUrl = ref('');
@@ -483,7 +605,10 @@ const data = reactive({
     endUpdateTime: null,
     startBirthday: null,
     endBirthday: null,
-    filterUpdateTime: 0
+    filterUpdateTime: 0,
+    eqWechat: null,
+    eqEmail: null,
+    eqPhone: null,
   }
 });
 const specifyUserData = ref({toUserId: null, userId: null, sameUserFlag: true, userData: null});
@@ -499,6 +624,11 @@ const queryParamUserFollow = ref({
 const queryParamCover = ref({
   pageIndex: 1,
   pageSize: 10,
+  gender: 2,
+  city: "重庆",
+  userId: null
+});
+const queryParamRecommended = ref({
   gender: 2,
   city: "重庆",
   userId: null
@@ -551,8 +681,9 @@ function setUserShareUrl(data) {
 }
 
 //查看上墙列表-用户详情、照片信息
-function handleUserCoverInfoOrPhoto(email, photoFlag = false) {
-  getListLazyCircleUser({eqEmail: email}).then(response => {
+function handleUserCoverInfoOrPhoto(data, photoFlag = false) {
+  //{eqEmail: email,userId: userId}
+  getListLazyCircleUser(data).then(response => {
     if (response.data && response.data.count && response.data.count > 0) {
       let firstData = response.data.data[0];
       if (photoFlag) {
@@ -590,6 +721,48 @@ function handleUserCoverList() {
   userCoverList.value = [];
   queryParamCover.value.pageIndex = 0;
   getUserCoverList();
+}
+
+function getAddRecommended() {
+  loading.value.loadUserRecommended = true;
+  addRecommended(queryParamRecommended.value.userId).then(response => {
+    getRecommendedUserList(true);
+  }).catch(() => {
+    loading.value.loadUserRecommended = false;
+  });
+}
+
+//获取随机推送用户信息
+function getRecommendedUserList(addRecommendedFlag = false) {
+  loading.value.loadUserRecommended = true;
+  getListRecommendedUser(queryParamRecommended.value, addRecommendedFlag ? "2" : "1").then(response => {
+    if (response.data) {
+      noMore.value.userRemainingNum = response.data.remaining;
+      if (response.data.data) {
+        if (addRecommendedFlag) {
+          userRecommendedList.value = userRecommendedList.value.concat(response.data.data);
+        } else {
+          userRecommendedList.value = response.data.data;
+        }
+      }
+    }
+    loading.value.loadUserRecommended = false;
+  }).catch(() => {
+    loading.value.loadUserRecommended = false;
+  });
+}
+
+//随机推送列表
+function handleUserRecommendedList(data) {
+  if (!dialog.value.userRecommended) {
+    userRecommendedList.value = [];
+    dialog.value.userRecommended = true;
+    queryParamRecommended.value.userId = data.userId;
+    queryParamRecommended.value.city = data.city;
+    queryParamRecommended.value.gender = data.gender === 2 ? 1 : 2;
+    noMore.value.userRemainingNum = 0;
+  }
+  getRecommendedUserList();
 }
 
 //获取关注列表数据
