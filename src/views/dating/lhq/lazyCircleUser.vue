@@ -212,6 +212,9 @@
                 <el-option v-for="dict in [{'value':2,'label':'女'},{'value':1,'label':'男'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
               </el-select>
             </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="Search" @click="handleUserCoverList">刷新</el-button>
+            </el-form-item>
           </el-form>
         </div>
         <div class="dr-page_scroll">
@@ -314,13 +317,16 @@
                 <el-option v-for="dict in [{'value':2,'label':'女'},{'value':1,'label':'男'}]" :key="dict.value" :label="dict.label" :value="dict.value"/>
               </el-select>
             </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="Search" @click="handleUserRecommendedList">刷新</el-button>
+            </el-form-item>
           </el-form>
         </div>
         <div class="dr-page_scroll">
           <div class="dr-page_wrap">
             <div>剩余推荐数：<span style="color: #b41be2;font-weight: bold;">{{noMore.userRemainingNum}}</span> 位</div>
             <el-row>
-              <el-col :span="8" v-for="(itemCover,index) in userRecommendedList" style="padding: 5px">
+              <el-col :span="8" v-for="(itemCover,index) in userRecommendedList" :key="index" style="padding: 5px">
                 <el-card>
                   <div style="padding: 14px">
                     <div class="common-layout">
