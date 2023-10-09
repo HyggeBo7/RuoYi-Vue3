@@ -116,7 +116,22 @@
     <el-table v-loading="loading.loadTable" :data="lazyCircleUserList">
       <el-table-column type="expand">
         <template #default="props">
-          <div style="padding: 10px 20px;">{{ props.row }}</div>
+          <div style="padding: 10px 20px;">
+            <div>{{ props.row }}</div>
+            <el-row :gutter="1" v-if="props.row.photos">
+              <el-col :span="24">
+                <el-image
+                  v-for="(item,index) in JSON.parse(props.row.photos)"
+                  :key="item.url"
+                  style="width: 100px; height: 100px"
+                  :src="item.url"
+                  :zoom-rate="1.2"
+                  :initial-index="4"
+                  fit="cover"
+                />
+              </el-col>
+            </el-row>
+          </div>
         </template>
       </el-table-column>
       <el-table-column align="left" header-align="center" type="index" width="56" label="序号">
@@ -234,7 +249,7 @@
                       </span>
                     </div>
                     <div style="padding: 5px">
-                      <el-row gutter="1">
+                      <el-row :gutter="1">
                         <el-col :span="12"><label>邮箱：</label><span>{{ itemCover.email }}</span></el-col>
                         <el-col :span="12"><label>日期：</label><span>{{ itemCover.create_time_text }}</span></el-col>
                         <el-col :span="12"><label>城市：</label><span>{{ itemCover.city }}</span></el-col>
@@ -279,11 +294,12 @@
               <span>{{ parseTime(scope.row.updateDate ? scope.row.updateDate : scope.row.createDate) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
+          <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
             <template #default="scope">
               <el-button type="warning" link icon="Edit" title="取消关注" @click="handleInsertUserFollow(scope.row.toFollowId,true)"></el-button>
               <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserFollowPhoto(scope.row.toFollowId)"></el-button>
               <el-button type="success" link icon="View" title="详情" @click="handleUserFollow(scope.row.toFollowId)"></el-button>
+              <el-button type="primary" link icon="StarFilled" title="推送" @click="handleUserRecommendedList({userId:scope.row.toFollowId})"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -365,13 +381,13 @@
                             </el-tag>
                           </el-footer>
                         </el-container>
-                        <el-aside width="100px">
+                        <el-aside width="100px" style=" padding: 0;background-color: transparent;">
                           <el-avatar shape="square" :size="100" fit="fill" :src="itemCover.avatar"/>
                         </el-aside>
                       </el-container>
                     </div>
                     <div style="padding: 5px">
-                      <el-row gutter="1">
+                      <el-row :gutter="1">
                         <el-col :span="24"><label>关于我：</label><span>{{ itemCover.describe }}</span></el-col>
                         <el-col :span="24"><label>希望你：</label><span>{{ itemCover.rOthers }}</span></el-col>
                         <el-col :span="24" v-if="itemCover.id">
@@ -461,11 +477,11 @@
         <el-button v-if="userShareUrl" :key="userShareUrl" type="primary" icon="Share" size="small" circle v-copyText="userShareUrl" v-copyText:callback="copyTextSuccess" title="分享链接"/>
       </div>
       <div class="demo-image__lazy">
-        <div v-for="item in photoList">
-          <div style="margin: 10px auto;text-align: center;font-weight: bold;">
-            {{ item.user_id }}---{{ item.create_date }}
+        <div v-for="(item,index) in photoList" style="max-width: 600px; max-height: 620px;margin:10px auto;">
+          <div style="text-align: center;font-weight: bold;">
+            ({{ index + 1 }}/{{photoList.length}})-{{ item.user_id }}---{{ item.create_date }}
           </div>
-          <el-image :key="item.url" :src="item.url" lazy/>
+          <el-image style="max-height: 600px" :key="item.url" :src="item.url" lazy/>
         </div>
       </div>
       <template #footer>
@@ -764,7 +780,7 @@ function handleUserRecommendedList(data) {
     userRecommendedList.value = [];
     dialog.value.userRecommended = true;
     queryParamRecommended.value.userId = data.userId;
-    queryParamRecommended.value.city = data.city;
+    queryParamRecommended.value.city = data.city ? data.city : queryParams.value.city ? queryParams.value.city : "重庆";
     queryParamRecommended.value.gender = data.gender === 2 ? 1 : 2;
     noMore.value.userRemainingNum = 0;
   }
