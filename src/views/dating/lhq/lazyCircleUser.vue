@@ -136,7 +136,7 @@
       </el-table-column>
       <el-table-column align="left" header-align="center" type="index" width="56" label="序号">
         <template #default="scope">
-          <div style="cursor:pointer" :title="scope.row.userId" v-copyText="scope.row.userId" v-copyText:callback="copyTextSuccess">{{ (queryParams.pageIndex - 1) * queryParams.pageSize + scope.$index + 1 }}</div>
+          <div :key="scope.row.userId" style="cursor:pointer" :title="scope.row.userId" v-copyText="scope.row.userId" v-copyText:callback="copyTextSuccess">{{ (queryParams.pageIndex - 1) * queryParams.pageSize + scope.$index + 1 }}</div>
         </template>
       </el-table-column>
       <el-table-column label="头像" align="center" idth="30">
@@ -472,7 +472,9 @@
           title="预览照片"
           :preview-src-list="photoList.map(d=>d.url)"
           fit="cover"/>
-        <span style="margin: 0 10px;">{{ lazyCircleUserData.userId }}</span>
+        <span style="margin: 0 15px;">
+          <span :key="lazyCircleUserData.userId" style="cursor:pointer" v-copyText="lazyCircleUserData.userId" v-copyText:callback="copyTextSuccess">{{ lazyCircleUserData.userId }}</span>
+        </span>
         <span style="margin: 0 10px;"><label style="color: #F56C6C">{{ lazyCircleUserList.indexOf(lazyCircleUserData) + 1 }}</label> / {{ lazyCircleUserList.length }}</span>
         <el-button v-if="userShareUrl" :key="userShareUrl" type="primary" icon="Share" size="small" circle v-copyText="userShareUrl" v-copyText:callback="copyTextSuccess" title="分享链接"/>
       </div>
