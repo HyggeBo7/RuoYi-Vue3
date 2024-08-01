@@ -3,7 +3,7 @@ import useUserStore from '@/store/modules/user';
 
 export function getListLazyCircleUser(data) {
   return request({
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    //headers: {'Content-Type': 'application/x-www-form-urlencoded'},
     url: '/lhq/listLazyCircleUser',
     method: 'post',
     data: data
@@ -38,7 +38,7 @@ export function updateLhqUser(data) {
 //获取关注信息列表
 export function getListUserFollow(data) {
   return request({
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    //headers: {'Content-Type': 'application/x-www-form-urlencoded'},
     url: '/lhq/listUserFollow',
     method: 'post',
     data: {...data, followId: useUserStore().userId}

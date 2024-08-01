@@ -250,11 +250,22 @@
                     </div>
                     <div style="padding: 5px">
                       <el-row :gutter="1">
-                        <el-col :span="12"><label>邮箱：</label><span>{{ itemCover.email }}</span></el-col>
+                        <el-col :span="12"><label>邮箱：</label>
+                          <span v-if="itemCover.email">
+                            <el-button type="primary" link @click="handleUserCoverInfoOrPhoto({eqEmail:itemCover.email},true)">{{ itemCover.email }}</el-button>
+                          </span>
+                          <span v-else>---</span>
+                        </el-col>
                         <el-col :span="12"><label>日期：</label><span>{{ itemCover.create_time_text }}</span></el-col>
                         <el-col :span="12"><label>城市：</label><span>{{ itemCover.city }}</span></el-col>
                         <el-col :span="12"><label>性别：</label><span>{{ itemCover.gender === 2 ? "女" : itemCover.gender === 1 ? "男" : "未知-" + itemCover.gender }}</span></el-col>
-                        <el-col :span="24" v-if="itemCover.email">
+                        <el-col :span="12"><label>微信：</label>
+                          <span v-if="itemCover.wechat">
+                            <el-button type="primary" link @click="handleUserCoverInfoOrPhoto({eqWechat:itemCover.wechat},true)">{{ itemCover.wechat }}</el-button>
+                          </span>
+                          <span v-else>---</span>
+                        </el-col>
+                        <el-col :span="12" v-if="itemCover.email">
                           <label>操作：</label>
                           <el-button type="success" link icon="Picture" title="照片详情" @click="handleUserCoverInfoOrPhoto({eqEmail:itemCover.email},true)"></el-button>
                           <el-button type="success" link icon="View" title="详情" @click="handleUserCoverInfoOrPhoto({eqEmail:itemCover.email})"></el-button>
@@ -340,7 +351,7 @@
         </div>
         <div class="dr-page_scroll">
           <div class="dr-page_wrap">
-            <div>剩余推荐数：<span style="color: #b41be2;font-weight: bold;">{{noMore.userRemainingNum}}</span> 位</div>
+            <div>剩余推荐数：<span style="color: #b41be2;font-weight: bold;">{{ noMore.userRemainingNum }}</span> 位</div>
             <el-row>
               <el-col :span="8" v-for="(itemCover,index) in userRecommendedList" :key="index" style="padding: 5px">
                 <el-card>
@@ -481,7 +492,7 @@
       <div class="demo-image__lazy">
         <div v-for="(item,index) in photoList" style="max-width: 600px; max-height: 620px;margin:10px auto;">
           <div style="text-align: center;font-weight: bold;">
-            ({{ index + 1 }}/{{photoList.length}})-{{ item.user_id }}---{{ item.create_date }}
+            ({{ index + 1 }}/{{ photoList.length }})-{{ item.user_id }}---{{ item.create_date }}
           </div>
           <el-image style="max-height: 600px" :key="item.url" :src="item.url" lazy/>
         </div>
@@ -672,12 +683,26 @@ watch(
 function getList() {
   loading.value.loadTable = true;
   const dateRangeValue = dateRange.value;
+  let queryData = queryParams.value;
+  if (queryData.userId || queryData.eqWechat || queryData.eqEmail || queryData.eqPhone) {
+    queryData = {
+      userId: queryData.userId,
+      eqWechat: queryData.eqWechat,
+      eqEmail: queryData.eqEmail,
+      eqPhone: queryData.eqPhone,
+    }
+  }
   getListLazyCircleUser({
-    ...queryParams.value,
-    startUpdateTime: dateRangeValue.updateTime[0],
-    endUpdateTime: dateRangeValue.updateTime[1],
-    startBirthday: dateRangeValue.birthday[0],
-    endBirthday: dateRangeValue.birthday[1]
+    condition: {
+      ...queryData,
+      startUpdateTime: dateRangeValue.updateTime[0],
+      endUpdateTime: dateRangeValue.updateTime[1],
+      startBirthday: dateRangeValue.birthday[0],
+      endBirthday: dateRangeValue.birthday[1]
+    },
+    pageIndex: queryParams.value.pageIndex,
+    pageSize: queryParams.value.pageSize,
+    desc: ["update_time"]
   }).then(response => {
     //console.log("getListLazyCircleUser---response", response);
     lazyCircleUserList.value = response.data.data;
@@ -707,8 +732,8 @@ function setUserShareUrl(data) {
 //查看上墙列表-用户详情、照片信息
 function handleUserCoverInfoOrPhoto(data, photoFlag = false) {
   //{eqEmail: email,userId: userId}
-  getListLazyCircleUser(data).then(response => {
-    if (response.data && response.data.count && response.data.count > 0) {
+  getListLazyCircleUser({condition: {...data, photoValueFlag: false, filterUpdateTime: null}, pageSize: 1, pageIndex: 1}).then(response => {
+    if (response.data && response.data.total && response.data.total > 0) {
       let firstData = response.data.data[0];
       if (photoFlag) {
         handlePhoto(firstData);
@@ -716,7 +741,7 @@ function handleUserCoverInfoOrPhoto(data, photoFlag = false) {
         handleDetail(firstData);
       }
     } else {
-      proxy.$modal.msgWarning("邮箱【" + email + "】信息不存在");
+      proxy.$modal.msgWarning("信息【" + JSON.stringify(data) + "】信息不存在");
     }
   });
 }
@@ -793,7 +818,12 @@ function handleUserRecommendedList(data) {
 function getUserFollowList() {
   loading.value.loadUserFollowTable = true;
   getListUserFollow({
-    ...queryParamUserFollow.value
+    condition: {
+      ...queryParamUserFollow.value
+    },
+    pageIndex: queryParamUserFollow.value.pageIndex,
+    pageSize: queryParamUserFollow.value.pageSize,
+    desc: ["create_date"]
   }).then(response => {
     userFollowList.value = response.data.data;
     totalUserFollow.value = response.data.count;
@@ -962,26 +992,26 @@ initView();
 </script>
 <style scoped>
 .demo-image__lazy {
-    height: 600px;
-    overflow-y: auto;
+  height: 600px;
+  overflow-y: auto;
 }
 
 .demo-image__lazy .el-image {
-    display: block;
-    min-height: 280px;
-    margin-bottom: 20px;
+  display: block;
+  min-height: 280px;
+  margin-bottom: 20px;
 }
 
 .demo-image__lazy .el-image:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .dr-page_scroll {
-    height: 600px;
+  height: 600px;
 }
 
 .dr-page_wrap {
-    overflow-y: scroll;
-    height: 100%;
+  overflow-y: scroll;
+  height: 100%;
 }
 </style>

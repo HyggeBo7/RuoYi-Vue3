@@ -33,15 +33,18 @@ export default defineConfig(({ mode, command }) => {
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
-          target: 'https://xfyl.dearbo.top',
+          //target: 'http://xfyl.dearbo.top',
+          target: 'http://localhost:8080',
           changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/dev-api/, 'bo-api-ry-admin')
+          rewrite: (p) => p.replace(/^\/dev-api/, 'dan-web-api')
         },
         '/bo-api-xfylw':{
-          target: 'https://xfyl.dearbo.top',
+          target: 'http://localhost:8080',
+          //target: 'http://xfyl.dearbo.top',
           //target: 'http://localhost:8020',
           changeOrigin: true,
-          rewrite: (p) => p
+          //rewrite: (p) => p
+          rewrite: (p) => p.replace(/^\/bo-api-xfylw/, 'dan-web-api')
           //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, '')
         }
       }
