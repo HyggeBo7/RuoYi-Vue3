@@ -2,8 +2,6 @@ import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
 
-import globalConfig from '../../config'
-
 /**
  * Note: 路由配置项
  *
@@ -79,7 +77,7 @@ export const constantRoutes = [
     redirect: 'noredirect',
     children: [
       {
-        path: 'profile',
+        path: 'profile/:activeTab?',
         component: () => import('@/views/system/user/profile/index'),
         name: 'Profile',
         meta: { title: '个人中心', icon: 'user' }
@@ -161,17 +159,16 @@ export const dynamicRoutes = [
     ]
   }
 ]
-//globalConfig.publicPath +
+
 const router = createRouter({
   history: createWebHistory("#/"),
   routes: constantRoutes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
-    } else {
-      return {top: 0}
     }
+    return { top: 0 }
   },
-});
+})
 
-export default router;
+export default router
