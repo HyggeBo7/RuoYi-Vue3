@@ -4,8 +4,8 @@ import createVitePlugins from './vite/plugins'
 import globalConfig from './config'
 
 // 后端接口
-//const baseUrl = 'http://xfyl.dearbo.top'
-const baseUrl = 'http://localhost:8080'
+const baseUrl = 'http://xfyl.dearbo.top'
+//const baseUrl = 'http://localhost:8080'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
@@ -54,8 +54,8 @@ export default defineConfig(({ mode, command }) => {
         '/dev-api': {
           target: baseUrl,
           changeOrigin: true,
-          //rewrite: (p) => p.replace(/^\/dev-api/, 'bo-api-ry-admin')
-          rewrite: (p) => p.replace(/^\/dev-api/, 'dan-web-api')
+          rewrite: (p) => p.replace(/^\/dev-api/, 'bo-api-ry-admin')
+          //rewrite: (p) => p.replace(/^\/dev-api/, 'dan-web-api')
         },
         // springdoc proxy
         '^/v3/api-docs/(.*)': {
@@ -65,8 +65,8 @@ export default defineConfig(({ mode, command }) => {
         '/bo-api-xfylw': {
           target: baseUrl,
           changeOrigin: true,
-          //rewrite: (p) => p
-          rewrite: (p) => p.replace(/^\/bo-api-xfylw/, 'dan-web-api')
+          rewrite: (p) => p
+          //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, 'dan-web-api')
         }
       }
     },
