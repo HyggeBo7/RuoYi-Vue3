@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">若依后台管理系统</h3>
+      <h3 class="title">后台管理系统</h3>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"
@@ -59,7 +59,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2023 ruoyi.vip All Rights Reserved.</span>
+      <span>Copyright © 2018-2024 ruoyi.vip All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -71,6 +71,7 @@ import { encrypt, decrypt } from "@/utils/jsencrypt";
 import useUserStore from '@/store/modules/user'
 
 const userStore = useUserStore()
+const route = useRoute();
 const router = useRouter();
 const { proxy } = getCurrentInstance();
 
@@ -96,6 +97,10 @@ const captchaEnabled = ref(true);
 const register = ref(false);
 const redirect = ref(undefined);
 
+watch(route, (newRoute) => {
+    redirect.value = newRoute.query && newRoute.query.redirect;
+}, { immediate: true });
+
 function handleLogin() {
   proxy.$refs.loginRef.validate(valid => {
     if (valid) {
@@ -113,7 +118,14 @@ function handleLogin() {
       }
       // 调用action的登录方法
       userStore.login(loginForm.value).then(() => {
-        router.push({ path: redirect.value || "/" });
+        const query = route.query;
+        const otherQueryParams = Object.keys(query).reduce((acc, cur) => {
+          if (cur !== "redirect") {
+            acc[cur] = query[cur];
+          }
+          return acc;
+        }, {});
+        router.push({ path: redirect.value || "/", query: otherQueryParams });
       }).catch(() => {
         loading.value = false;
         // 重新获取验证码

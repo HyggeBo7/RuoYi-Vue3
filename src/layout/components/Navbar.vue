@@ -33,7 +33,7 @@
               <router-link to="/user/profile">
                 <el-dropdown-item>个人中心</el-dropdown-item>
               </router-link>
-              <el-dropdown-item command="setLayout">
+              <el-dropdown-item command="setLayout" v-if="settingsStore.showSettings">
                 <span>布局设置</span>
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
@@ -60,6 +60,7 @@ import RuoYiDoc from '@/components/RuoYi/Doc'
 import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
+import globalConfig from '../../../config'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
@@ -91,6 +92,7 @@ function logout() {
   }).then(() => {
     userStore.logOut().then(() => {
       //location.href = '/index';
+      //location.href = globalConfig.indexUrl;
       router.push('/login');
     })
   }).catch(() => { });
