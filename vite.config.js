@@ -62,14 +62,12 @@ export default defineConfig(({ mode, command }) => {
           target: baseUrl,
           changeOrigin: true
         },
-        '/bo-api-xfylw':{
-          target: 'http://localhost:8080',
-          //target: 'http://xfyl.dearbo.top',
-          //target: 'http://localhost:8020',
+        '/bo-api-xfylw': {
+          target: baseUrl,
           changeOrigin: true,
           //rewrite: (p) => p
           rewrite: (p) => p.replace(/^\/bo-api-xfylw/, 'dan-web-api')
-          //rewrite: (p) => p.replace(/^\/bo-api-xfylw/, '')
+        }
       }
     },
     css: {
